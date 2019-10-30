@@ -1,33 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginLeft="30dp"
+    android:layout_marginTop="30dp"
+    android:layout_marginRight="30dp"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <TextView
+        android:id="@+id/textView3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_marginBottom="50dp"
+        android:gravity="center"
+        android:text="Sport Verein Langenpreising"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <include layout="@layout/content_main" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/main_create_Account_EditText_VorName"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:layout_marginBottom="20dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Vorname"
+        android:textColorLink="#E91E63"
+        android:textSize="12sp"
+        android:textStyle="italic" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <EditText
+        android:id="@+id/main_create_Account_EditText_NachName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Nachname"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:layout_marginBottom ="20dp"/>
+
+    <EditText
+        android:id="@+id/main_create_Account_EditText_Mail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        android:text="E-Mail"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:layout_marginBottom ="10dp"/>
+
+    <Button
+        android:id="@+id/main_create_Account_Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create Account"
+        android:layout_marginBottom ="40dp"
+       />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Falls das mobile Gerät gewechselt wurde und der alte Account noch besteht, beantragen Sie mit Hilfe ihrer Mailadresse einen neuen generieren Zugang"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:layout_marginBottom ="10dp"/>
+
+    <Button
+        android:id="@+id/main_create_Account_Button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="repeated login" />
+
+
+</LinearLayout>
