@@ -26,7 +26,7 @@
         android:layout_marginBottom="10dp"
         android:ems="10"
         android:inputType="textEmailAddress"
-        android:text="Mail"
+        android:hint="Mail"
         android:textSize="12sp"
         android:textStyle="italic" />
 
@@ -53,7 +53,7 @@
         android:layout_marginBottom="10dp"
         android:ems="10"
         android:inputType="textPassword"
-        android:text="Passwort"
+        android:hint="Passwort"
         android:textSize="12sp"
         android:textStyle="italic" />
 
