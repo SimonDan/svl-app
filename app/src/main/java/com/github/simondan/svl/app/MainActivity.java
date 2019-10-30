@@ -2,23 +2,21 @@ package com.github.simondan.svl.app;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.util.Log;
-import android.view.MenuInflater;
-import android.view.View;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "xx Main Activity";
 
-   //UI Variablen Deklarieren
+    //UI Variablen Deklarieren
     EditText mEditTextVorName;
     EditText mEditTextNachName;
     EditText mEditTextMail;
@@ -30,7 +28,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
 
         //UI Variablen initialisieren
@@ -45,16 +42,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mButtonCreateAccount2.setOnClickListener(this);
 
 
-
-
         //FloatingActionButton fab = findViewById(R.id.fab);
         //fab.setOnClickListener(new View.OnClickListener() {
-          //  @Override
-           // public void onClick(View view) {
-            //    Snackbar.make(view, "Hier geht es zu den Strafen", Snackbar.LENGTH_LONG)
-            //            .setAction("Action", null).show();
-          //  }
-       // });
+        //  @Override
+        // public void onClick(View view) {
+        //    Snackbar.make(view, "Hier geht es zu den Strafen", Snackbar.LENGTH_LONG)
+        //            .setAction("Action", null).show();
+        //  }
+        // });
 
     }
 
@@ -80,10 +75,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-
-
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart");
     }
@@ -119,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
     @Override
     public void onClick(View v) {
         int i = v.getId();
@@ -129,14 +121,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         "Create Account pressed", Toast.LENGTH_LONG).show();
                 return;
             case R.id.main_create_Account_Button2:
-               Intent intent = new Intent (this,RepeatedLogin.class);
-               startActivity(intent);
-               this.finish();
+                Intent intent = new Intent(this, RepeatedLogin.class);
+                startActivity(intent);
                 return;
         }
     }
-
-
 
 
 }

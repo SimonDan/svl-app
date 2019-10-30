@@ -13,7 +13,6 @@ public class RepeatedLogin extends AppCompatActivity implements View.OnClickList
 
     Button mButton;
     Button mButton2;
-    Button mButton3;
     EditText mEdittext;
     EditText mEdittext2;
 
@@ -27,17 +26,13 @@ public class RepeatedLogin extends AppCompatActivity implements View.OnClickList
         mEdittext2 = (EditText) findViewById(R.id.activity_repeated_login_Passwort);
         mButton = (Button) findViewById(R.id.activity_repeated_login_Button_Senden);
         mButton2 = (Button) findViewById(R.id.activity_repeated_login_Button_Senden_Server);
-        mButton3 = (Button) findViewById(R.id.activity_repeated_login_Button_Zurück);
+
 
         mButton.setOnClickListener(this);
         mButton2.setOnClickListener(this);
-        mButton3.setOnClickListener(this);
         mEdittext.setOnClickListener(this);
         mEdittext2.setOnClickListener(this);
-
-
     }
-
 
     @Override
     public void onClick(View v) {
@@ -51,11 +46,7 @@ public class RepeatedLogin extends AppCompatActivity implements View.OnClickList
                 Toast.makeText(getApplicationContext(),
                         "Das Passwort wurde an den Server erfolgreich gesendet. Starten Sie die App neu.", Toast.LENGTH_LONG).show();
                 return;
-            case R.id.activity_repeated_login_Button_Zurück:
-                Intent intent = new Intent (this,MainActivity.class);
-                startActivity(intent);
-                this.finish();
-                return;
+
 
         }
     }

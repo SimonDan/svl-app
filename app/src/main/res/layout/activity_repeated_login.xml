@@ -64,10 +64,5 @@
         android:layout_marginBottom="20mm"
         android:text="Senden" />
 
-    <Button
-        android:id="@+id/activity_repeated_login_Button_Zurück"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="38mm"
-        android:text="Zurück" />
+
 </LinearLayout>
