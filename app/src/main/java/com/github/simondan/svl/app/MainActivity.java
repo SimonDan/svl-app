@@ -121,10 +121,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         "Create Account pressed", Toast.LENGTH_LONG).show();
                 return;
             case R.id.main_create_Account_Button2:
-                Intent intent = new Intent(this, RepeatedLogin.class);
-                startActivity(intent);
+               openDialog();
                 return;
         }
+    }
+
+    public void openDialog(){
+        Repeated_Dialog repeatedDialog = new Repeated_Dialog();
+        repeatedDialog.show(getSupportFragmentManager(),"Server dialog");
     }
 
 

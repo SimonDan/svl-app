@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="30dp"
-    android:layout_marginTop="30dp"
-    android:layout_marginRight="30dp"
-    android:orientation="vertical"
-    tools:context=".RepeatedLogin">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Bitte geben Sie hier Ihre Mail Adresse an, an der das neu generierte Passwort gesendet werden soll"
+        android:text="Eingabe der Mail Adresse gefordert, um ein neues Passwort generieren zu lassen"
         android:textSize="12sp"
         android:textStyle="italic" />
 
     <EditText
-        android:id="@+id/activity_repeated_login_EditText_Mail"
+        android:id="@+id/edit_repeated_loginMail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
@@ -31,7 +25,7 @@
         android:textStyle="italic" />
 
     <Button
-        android:id="@+id/activity_repeated_login_Button_Senden"
+        android:id="@+id/repeated_login_Button_Senden"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
@@ -42,12 +36,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="In wenigen Minuten senden wir Ihnen an die genannte Mailadresse das neue Passwort zu. Bitte geben Sie dieses hier ein. "
+        android:text="Bitte geben Sie das neu erhaltene Passwort hier ein"
         android:textSize="12sp"
         android:textStyle="italic" />
 
     <EditText
-        android:id="@+id/activity_repeated_login_Passwort"
+        android:id="@+id/edit_repeated_login_Passwort"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
@@ -56,13 +50,6 @@
         android:hint="Passwort"
         android:textSize="12sp"
         android:textStyle="italic" />
-
-    <Button
-        android:id="@+id/activity_repeated_login_Button_Senden_Server"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20mm"
-        android:text="Senden" />
 
 
 </LinearLayout>
