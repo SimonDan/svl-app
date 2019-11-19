@@ -1,6 +1,5 @@
 package com.github.simondan.svl.app;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -127,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void openDialog(){
-        Repeated_Dialog repeatedDialog = new Repeated_Dialog();
+        RepeatedDialog repeatedDialog = new RepeatedDialog();
         repeatedDialog.show(getSupportFragmentManager(),"Server dialog");
     }
 
