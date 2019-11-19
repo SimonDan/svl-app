@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Eingabe der Mail Adresse gefordert, um ein neues Passwort generieren zu lassen"
+        android:text="Eingabe der Mail Adresse gefordert, um eine Serveranfrage für einen Wiederherstellungs-Code zu starten"
         android:textSize="12sp"
         android:textStyle="italic" />
 
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Bitte geben Sie das neu erhaltene Passwort hier ein"
+        android:text="Bitte geben Sie hier den neu erhaltene Wiederherstellungs-Code ein"
         android:textSize="12sp"
         android:textStyle="italic" />
 

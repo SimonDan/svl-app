@@ -1,7 +1,7 @@
 package com.github.simondan.svl.app;
 
 import android.app.*;
-import android.content.DialogInterface;
+import android.content.*;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
@@ -39,7 +39,8 @@ public class RepeatedDialog extends AppCompatDialogFragment
           @Override
           public void onClick(DialogInterface dialogInterface, int i)
           {
-            //Serveranfrage starten
+            Intent intent = new Intent(getContext(), MainActivity.class);
+            startActivity(intent);
           }
         });
 
@@ -52,7 +53,7 @@ public class RepeatedDialog extends AppCompatDialogFragment
       @Override
       public void onClick(View v)
       {
-        Toast.makeText(getActivity(), "Es wurde soeben an die oben genante Mail Adresse ein neues Passwort gesendet", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Es wurde soeben an die oben genante Mail Adresse Wiederherstellungs-Code gesendet", Toast.LENGTH_LONG).show();
       }
     });
 
