@@ -25,10 +25,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
+        android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
-        android:inputType="textPersonName"
         android:hint="Vorname"
-        android:textColorLink="#E91E63"
+        android:inputType="textPersonName"
+        android:textColorHighlight="#FFEB3B"
+        android:textColorLink="#FFC107"
+        android:textCursorDrawable="@android:color/holo_orange_light"
         android:textSize="12sp"
         android:textStyle="italic" />
 
@@ -36,31 +39,39 @@
         android:id="@+id/main_create_Account_EditText_NachName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
-        android:inputType="textPersonName"
         android:hint="Nachname"
+        android:inputType="textPersonName"
+        android:textColorHighlight="#FFEB3B"
+        android:textColorLink="#FFC107"
+        android:textCursorDrawable="@android:color/holo_orange_light"
         android:textSize="12sp"
-        android:textStyle="italic"
-        android:layout_marginBottom ="20dp"/>
+        android:textStyle="italic" />
 
     <EditText
         android:id="@+id/main_create_Account_EditText_Mail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
-        android:inputType="textEmailAddress"
         android:hint="E-Mail"
+        android:inputType="textEmailAddress"
+        android:textColorHighlight="#FFEB3B"
+        android:textColorLink="#FFC107"
+        android:textCursorDrawable="@android:color/holo_orange_light"
         android:textSize="12sp"
-        android:textStyle="italic"
-        android:layout_marginBottom ="10dp"/>
+        android:textStyle="italic" />
 
     <Button
         android:id="@+id/main_create_Account_Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Create Account"
-        android:layout_marginBottom ="40dp"
-       />
+        android:layout_marginBottom="40dp"
+        android:background="#FFC107"
+        android:text="Create Account" />
 
     <TextView
         android:id="@+id/textView"
@@ -75,6 +86,7 @@
         android:id="@+id/main_create_Account_Button2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#FFC107"
         android:text="repeated login" />
 
 

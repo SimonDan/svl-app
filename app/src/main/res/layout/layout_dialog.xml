@@ -18,9 +18,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
+        android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
-        android:inputType="textEmailAddress"
         android:hint="Mail"
+        android:inputType="textEmailAddress"
+        android:textColorHighlight="#FFEB3B"
+        android:textColorLink="#FFC107"
+        android:textCursorDrawable="@android:color/holo_orange_light"
         android:textSize="12sp"
         android:textStyle="italic" />
 
@@ -29,6 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
+        android:background="#FFC107"
         android:text="Senden" />
 
     <TextView
@@ -45,9 +50,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
+        android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
-        android:inputType="textPassword"
         android:hint="Passwort"
+        android:inputType="textPassword"
+        android:textColorHighlight="#FFEB3B"
+        android:textColorLink="#FFC107"
+        android:textCursorDrawable="@android:color/holo_orange_light"
         android:textSize="12sp"
         android:textStyle="italic" />
 

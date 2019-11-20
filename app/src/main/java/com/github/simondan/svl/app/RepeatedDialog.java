@@ -2,11 +2,13 @@ package com.github.simondan.svl.app;
 
 import android.app.*;
 import android.content.*;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatDialogFragment;
+
 
 public class RepeatedDialog extends AppCompatDialogFragment
 {
@@ -24,25 +26,40 @@ public class RepeatedDialog extends AppCompatDialogFragment
     View view = inflater.inflate(R.layout.layout_dialog, null);
 
 
-    builder.setView(view)
-        .setTitle("Login")
-        .setNegativeButton("cancel", new DialogInterface.OnClickListener()
+   builder.setView(view)
+        .setTitle("Login");
+
+
+        final AlertDialog dialogNegativ = builder.setNegativeButton("cancel", new DialogInterface.OnClickListener()
         {
           @Override
           public void onClick(DialogInterface dialogInterface, int i)
           {
 
           }
-        })
-        .setPositiveButton("ok", new DialogInterface.OnClickListener()
+
+        }).create();
+
+        final AlertDialog dialogPositiv = builder.setPositiveButton("ok", new DialogInterface.OnClickListener()
         {
           @Override
           public void onClick(DialogInterface dialogInterface, int i)
           {
-            Intent intent = new Intent(getContext(), MainActivity.class);
+            Intent intent = new Intent(getContext(), BeginActivity.class);
             startActivity(intent);
           }
-        });
+        }).create();
+
+
+    //2. now setup to change color of the button
+    dialogPositiv.setOnShowListener( new DialogInterface.OnShowListener() {
+
+      @Override
+      public void onShow(DialogInterface arg0) {
+        dialogPositiv.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.blue());
+      }
+    });
+
 
     editTextMail = view.findViewById(R.id.edit_repeated_loginMail);
     editTextPassword = view.findViewById(R.id.edit_repeated_login_Passwort);
@@ -57,6 +74,8 @@ public class RepeatedDialog extends AppCompatDialogFragment
       }
     });
 
-    return builder.create();
+
+
+  return builder.create();
   }
 }
