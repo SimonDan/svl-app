@@ -9,12 +9,42 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Eingabe der Mail Adresse gefordert, um eine Serveranfrage für einen Wiederherstellungs-Code zu starten"
+        android:text="Eingabe der Nutzer-Daten, um einen Wiederherstellungscode per Email zu erhalten"
         android:textSize="12sp"
         android:textStyle="italic" />
 
     <EditText
-        android:id="@+id/edit_repeated_loginMail"
+        android:id="@+id/edit_restore_auth_first_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:ems="10"
+        android:hint="Vorname"
+        android:inputType="text"
+        android:textColorHighlight="#FFEB3B"
+        android:textColorLink="#FFC107"
+        android:textCursorDrawable="@android:color/holo_orange_light"
+        android:textSize="12sp"
+        android:textStyle="italic" />
+
+    <EditText
+        android:id="@+id/edit_restore_auth_last_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:ems="10"
+        android:hint="Nachname"
+        android:inputType="text"
+        android:textColorHighlight="#FFEB3B"
+        android:textColorLink="#FFC107"
+        android:textCursorDrawable="@android:color/holo_orange_light"
+        android:textSize="12sp"
+        android:textStyle="italic" />
+
+    <EditText
+        android:id="@+id/edit_restore_auth_mail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
@@ -29,31 +59,31 @@
         android:textStyle="italic" />
 
     <Button
-        android:id="@+id/repeated_login_Button_Senden"
+        android:id="@+id/button_send_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
         android:background="#FFC107"
-        android:text="Senden" />
+        android:text="Code senden" />
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Bitte geben Sie hier den neu erhaltene Wiederherstellungs-Code ein"
+        android:text="Bitte geben Sie hier den neu erhaltene Wiederherstellungscode ein!"
         android:textSize="12sp"
         android:textStyle="italic" />
 
     <EditText
-        android:id="@+id/edit_repeated_login_Passwort"
+        android:id="@+id/edit_restore_auth_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
-        android:hint="Passwort"
-        android:inputType="textPassword"
+        android:hint="Wiederherstellungscode"
+        android:inputType="text"
         android:textColorHighlight="#FFEB3B"
         android:textColorLink="#FFC107"
         android:textCursorDrawable="@android:color/holo_orange_light"

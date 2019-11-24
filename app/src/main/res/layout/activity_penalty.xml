@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BeginActivity">
+    tools:context=".PenaltyActivity">
 
   <com.google.android.material.appbar.AppBarLayout
       android:layout_width="match_parent"
@@ -19,6 +19,18 @@
         app:popupTheme="@style/AppTheme.PopupOverlay" />
 
   </com.google.android.material.appbar.AppBarLayout>
+
+  <ProgressBar android:id="@+id/progress_bar"
+               style="?android:attr/progressBarStyleLarge"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="center"
+               android:indeterminate="true"
+               android:indeterminateTint="@android:color/holo_orange_light"
+               android:indeterminateTintMode="src_atop"
+               android:translationZ="2dp"
+               android:elevation="2dp"
+               android:visibility="invisible"/>
 
   <include layout="@layout/content_begin" />
 
