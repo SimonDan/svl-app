@@ -39,7 +39,7 @@ class RestCall<RESULT>
 
   private RESULT _callAndHandleAuthentication() throws RequestTimeoutException, AuthenticationImpossibleException, RequestFailedException
   {
-    if (!credentialsStore.isInitialized())
+    if (!credentialsStore.areCredentialsInitialized())
       throw new InternalCommunicationException("Unable to perform rest call with authentication! Credential store is not initialized!");
 
     try

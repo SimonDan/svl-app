@@ -6,9 +6,13 @@ import android.view.View;
 import android.widget.ProgressBar;
 import com.github.simondan.svl.app.*;
 import com.github.simondan.svl.app.communication.*;
+import com.github.simondan.svl.app.communication.exceptions.InternalCommunicationException;
 import com.github.simondan.svl.app.util.AndroidUtil;
 import com.github.simondan.svl.communication.auth.EUserRole;
+import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -28,7 +32,22 @@ class ServerImpl implements IServer
   @Override
   public boolean isCredentialsStoreInitialized()
   {
-    return credentialsStore.isInitialized();
+    return credentialsStore.areCredentialsInitialized();
+  }
+
+  @Override
+  public Optional<LastRestoreCode> getLastRestoreCodeData()
+  {
+    if (!credentialsStore.areCredentialsInitialized() && credentialsStore.areUserDataInitialized())
+    {
+      final String firstName = credentialsStore.getFirstName();
+      final String lastName = credentialsStore.getLastName();
+      final Instant timestamp = credentialsStore.getLastRestoreCodeTimestamp();
+
+      return Optional.of(new LastRestoreCode(firstName, lastName, timestamp));
+    }
+
+    return Optional.empty();
   }
 
   @Override
@@ -47,15 +66,27 @@ class ServerImpl implements IServer
   }
 
   @Override
-  public ICompletionCallback requestAuthRestoreCode(String pFirstName, String pLastName, String pMail)
+  public ICompletionCallback requestRestoreCode(String pFirstName, String pLastName, String pMail)
   {
-    return new _NoResultTask(pRestInterface -> pRestInterface.requestAuthRestoreCode(pFirstName, pLastName, pMail));
+    final Runnable storeUserData = () ->
+    {
+      credentialsStore.setUserData(pFirstName, pLastName);
+      credentialsStore.setLastRestoreCodeTimestamp(Instant.now());
+    };
+
+    return new _NoResultTask(pRestInterface -> pRestInterface.requestAuthRestoreCode(pFirstName, pLastName, pMail), storeUserData);
   }
 
   @Override
-  public ICompletionCallback restoreAuthentication(String pFirstName, String pLastName, String pRestoreCode)
+  public ICompletionCallback restoreAuthentication(String pRestoreCode)
   {
-    return new _NoResultTask(pRestInterface -> pRestInterface.restoreAuthentication(pFirstName, pLastName, pRestoreCode));
+    if (!credentialsStore.areUserDataInitialized())
+      throw new InternalCommunicationException("No user data set for authentication recovery!");
+
+    final String firstName = credentialsStore.getFirstName();
+    final String lastName = credentialsStore.getLastName();
+
+    return new _NoResultTask(pRestInterface -> pRestInterface.restoreAuthentication(firstName, lastName, pRestoreCode));
   }
 
   @Override
@@ -66,15 +97,28 @@ class ServerImpl implements IServer
 
   private class _NoResultTask extends _AbstractTask<Void> implements ICompletionCallback
   {
+    private final Runnable internalCompletionAction;
+
     _NoResultTask(RestNetworkTask.VoidRestCall pRestCall)
     {
+      this(pRestCall, null);
+    }
+
+    _NoResultTask(RestNetworkTask.VoidRestCall pRestCall, @Nullable Runnable pInternalCompletionAction)
+    {
       super(pRestCall);
+      internalCompletionAction = pInternalCompletionAction;
     }
 
     @Override
     public IStarter doOnCompletion(Runnable pAction)
     {
-      final RestNetworkTask<Void> restTask = createRestTask(pVoid -> pAction.run());
+      final RestNetworkTask<Void> restTask = createRestTask(pVoid ->
+                                                            {
+                                                              if (internalCompletionAction != null)
+                                                                internalCompletionAction.run();
+                                                              pAction.run();
+                                                            });
       return restTask::execute;
     }
   }

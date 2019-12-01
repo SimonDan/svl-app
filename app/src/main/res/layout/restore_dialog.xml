@@ -9,9 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Eingabe der Nutzer-Daten, um einen Wiederherstellungscode per Email zu erhalten"
+        android:text="Gib hier deine Daten ein, um einen Wiederherstellungscode per Email zu erhalten"
         android:textSize="12sp"
-        android:textStyle="italic" />
+        android:textStyle="italic"/>
 
     <EditText
         android:id="@+id/edit_restore_auth_first_name"
@@ -54,9 +54,7 @@
         android:inputType="textEmailAddress"
         android:textColorHighlight="#FFEB3B"
         android:textColorLink="#FFC107"
-        android:textCursorDrawable="@android:color/holo_orange_light"
-        android:textSize="12sp"
-        android:textStyle="italic" />
+        android:textCursorDrawable="@android:color/holo_orange_light" android:textSize="12sp" android:textStyle="italic"/>
 
     <Button
         android:id="@+id/button_send_code"
@@ -67,13 +65,13 @@
         android:text="Code senden" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/text_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Bitte geben Sie hier den neu erhaltene Wiederherstellungscode ein!"
+        android:text="Lass dir zuerst einen Code per Mail zusenden!"
         android:textSize="12sp"
-        android:textStyle="italic" />
+        android:textStyle="italic"/>
 
     <EditText
         android:id="@+id/edit_restore_auth_code"
@@ -81,14 +79,20 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:backgroundTint="@android:color/holo_orange_light"
+        android:duplicateParentState="false"
         android:ems="10"
+        android:enabled="false"
         android:hint="Wiederherstellungscode"
         android:inputType="text"
         android:textColorHighlight="#FFEB3B"
-        android:textColorLink="#FFC107"
-        android:textCursorDrawable="@android:color/holo_orange_light"
-        android:textSize="12sp"
-        android:textStyle="italic" />
+        android:textColorLink="#FFC107" android:textCursorDrawable="@android:color/holo_orange_light" android:textSize="12sp" android:textStyle="italic"/>
+    <Button
+        android:id="@+id/button_restore_account"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:background="#FFC107"
+        android:clickable="false" android:enabled="false" android:text="Account wiederherstellen"/>
 
 
 </LinearLayout>

@@ -2,7 +2,7 @@ package com.github.simondan.svl.app;
 
 import android.app.*;
 import android.content.Intent;
-import android.os.Bundle;
+import android.os.*;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
@@ -11,7 +11,9 @@ import com.github.simondan.svl.app.server.IServer;
 import com.github.simondan.svl.app.util.FormModel;
 import com.github.simondan.svl.communication.utils.SharedUtils;
 
+import java.time.*;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static com.github.simondan.svl.communication.utils.SharedUtils.*;
 
@@ -25,6 +27,7 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
   private IServer server;
   private FormModel formSendCode;
   private FormModel formRestore;
+  private View dialogView;
 
   @NonNull
   @Override
@@ -33,68 +36,93 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     server = IServer.getForCurrentActivity(getActivity());
 
     final LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
-    final View view = inflater.inflate(R.layout.layout_dialog, null);
+    dialogView = inflater.inflate(R.layout.restore_dialog, null);
 
     final AlertDialog dialog = new AlertDialog.Builder(getActivity())
-        .setView(view)
+        .setView(dialogView)
         .setTitle("Account Wiederherstellung")
-        .setNegativeButton("cancel", (dialogInterface, i) -> dialogInterface.dismiss())
-        .setPositiveButton("ok", null)
+        .setNegativeButton("Schließen", (dialogInterface, i) -> dialogInterface.dismiss())
         .create();
 
-    formSendCode = FormModel.createForView(view, dialog.getWindow())
+    formSendCode = FormModel.createForView(dialogView, dialog.getWindow())
         .addEditText(ID_FIRST_NAME, "Vorname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
         .addEditText(ID_LAST_NAME, "Nachname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
         .addEditText(ID_MAIL, "Email", SharedUtils.VALID_EMAIL_ADDRESS_REGEX)
         .addButton(R.id.button_send_code, this::_sendRestoreCode);
 
-    formRestore = FormModel.createForView(view, dialog.getWindow())
-        .addEditText(ID_CODE, "Code", CODE_LENGTH);
+    formRestore = FormModel.createForView(dialogView, dialog.getWindow())
+        .addEditText(ID_CODE, "Code", CODE_LENGTH)
+        .addButton(R.id.button_restore_account, this::_restoreAuthentication);
+
+    server.getLastRestoreCodeData().ifPresent(this::_enableRestoreButton);
 
     dialog.setOnShowListener(arg -> {
-      final Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-
-      okButton.setOnClickListener(view1 -> {
-        if (formRestore.allSatisfied())
-          _restoreAuthentication();
-        else
-          formRestore.toastAllUnsatisfied();
-      });
-
-      //Set button colors
-      okButton.setTextColor(getResources().getColor(R.color.dialogPositiveButton));
+      //Set button color
       dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.dialogNegativeButton));
     });
 
     return dialog;
   }
 
+  private void _enableRestoreButton(IServer.LastRestoreCode pRestoreData)
+  {
+    final Instant expirationTimestamp = pRestoreData.getSendTimestamp().plus(RESTORE_CODE_EXPIRATION_THRESHOLD);
+    final TextView codeText = dialogView.findViewById(R.id.text_code);
+
+    final String textInvalidCode = "Der Wiederherstellungscode für " + pRestoreData.getFirstName() + " " + pRestoreData.getLastName() +
+        " ist abgelaufen und nicht mehr gültig!";
+
+    if (expirationTimestamp.isBefore(Instant.now()))
+    {
+      codeText.setText(textInvalidCode);
+      return;
+    }
+
+    dialogView.findViewById(R.id.edit_restore_auth_code).setEnabled(true);
+    dialogView.findViewById(R.id.button_restore_account).setEnabled(true);
+
+    final Function<Duration, String> textCreator = pRemaining -> "Ein Code wurde für " + pRestoreData.getFirstName() + " " +
+        pRestoreData.getLastName() + " gesendet!\nEr ist noch " + pRemaining.toMinutes() + " Minuten und " + pRemaining.getSeconds() % 60 +
+        " Sekunden gültig!";
+
+    new CountDownTimer(Duration.between(Instant.now(), expirationTimestamp).toMillis(), 1000)
+    {
+      @Override
+      public void onTick(long pMillisUntilFinished)
+      {
+        codeText.setText(textCreator.apply(Duration.ofMillis(pMillisUntilFinished)));
+      }
+
+      @Override
+      public void onFinish()
+      {
+        codeText.setText(textInvalidCode);
+        dialogView.findViewById(R.id.edit_restore_auth_code).setEnabled(false);
+        dialogView.findViewById(R.id.button_restore_account).setEnabled(false);
+      }
+    }.start();
+  }
+
   private void _sendRestoreCode()
   {
-    if (!formSendCode.allSatisfied())
-      formSendCode.toastAllUnsatisfied();
-    else
-    {
-      server.requestAuthRestoreCode(formSendCode.value(ID_FIRST_NAME), formSendCode.value(ID_LAST_NAME), formSendCode.value(ID_MAIL))
-          .doOnCompletion(this::_showSuccessfulToast)
-          .startCall();
-    }
+    formSendCode.doOrToastUnsatisfied(values -> server.requestRestoreCode(values.id(ID_FIRST_NAME), values.id(ID_LAST_NAME), values.id(ID_MAIL))
+        .doOnCompletion(() ->
+                        {
+                          Toast.makeText(getActivity(), "Wiederherstellungscode per Email versandt!", Toast.LENGTH_LONG).show();
+                          server.getLastRestoreCodeData().ifPresent(this::_enableRestoreButton);
+                        })
+        .startCall());
   }
 
   private void _restoreAuthentication()
   {
-    server.restoreAuthentication(formSendCode.value(ID_FIRST_NAME), formSendCode.value(ID_LAST_NAME), formRestore.value(ID_CODE))
+    formRestore.doOrToastUnsatisfied(values -> server.restoreAuthentication(values.id(ID_CODE))
         .doOnCompletion(() ->
                         {
                           dismiss();
                           Intent intent = new Intent(getContext(), PenaltyActivity.class);
                           startActivity(intent);
                         })
-        .startCall();
-  }
-
-  private void _showSuccessfulToast()
-  {
-    Toast.makeText(getActivity(), "Wiederherstellungscode per Email versandt!", Toast.LENGTH_LONG).show();
+        .startCall());
   }
 }

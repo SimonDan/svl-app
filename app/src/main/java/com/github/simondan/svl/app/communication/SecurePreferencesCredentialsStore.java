@@ -7,6 +7,7 @@ import okhttp3.FormBody;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Instant;
 import java.util.Optional;
 
 import static com.github.simondan.svl.app.communication.config.DefaultConfig.*;
@@ -21,6 +22,7 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   private static final String LAST_NAME_KEY = "lastNameKey";
   private static final String NEXT_PASSWORD_KEY = "nextPasswordKey";
   private static final String USER_ROLE_KEY = "nextPasswordKey";
+  private static final String RESTORE_TIMESTAMP_KEY = "restoreTimestampKey";
   private static final String MASTER_KEY;
 
   private final SharedPreferences sharedPreferences;
@@ -56,12 +58,30 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
-  public boolean isInitialized()
+  public boolean areUserDataInitialized()
+  {
+    return sharedPreferences.contains(FIRST_NAME_KEY) && sharedPreferences.contains(LAST_NAME_KEY);
+  }
+
+  @Override
+  public boolean areCredentialsInitialized()
   {
     return sharedPreferences.contains(FIRST_NAME_KEY) &&
         sharedPreferences.contains(LAST_NAME_KEY) &&
         sharedPreferences.contains(NEXT_PASSWORD_KEY) &&
         sharedPreferences.contains(TOKEN_KEY);
+  }
+
+  @Override
+  public String getFirstName()
+  {
+    return _read(FIRST_NAME_KEY);
+  }
+
+  @Override
+  public String getLastName()
+  {
+    return _read(LAST_NAME_KEY);
   }
 
   @Override
@@ -87,6 +107,12 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
+  public Instant getLastRestoreCodeTimestamp()
+  {
+    return Instant.ofEpochMilli(Long.parseLong(_read(RESTORE_TIMESTAMP_KEY)));
+  }
+
+  @Override
   public void setUserData(String pFirstName, String pLastName)
   {
     final SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -104,6 +130,14 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
     editor.putString(TOKEN_KEY, pAuthenticationResponse.getToken());
     editor.putString(NEXT_PASSWORD_KEY, pAuthenticationResponse.getNextPassword());
     editor.putString(USER_ROLE_KEY, pAuthenticationResponse.getUserRole().name());
+    editor.apply();
+  }
+
+  @Override
+  public void setLastRestoreCodeTimestamp(Instant pTimestamp)
+  {
+    final SharedPreferences.Editor editor = sharedPreferences.edit();
+    editor.putString(RESTORE_TIMESTAMP_KEY, String.valueOf(pTimestamp.toEpochMilli()));
     editor.apply();
   }
 

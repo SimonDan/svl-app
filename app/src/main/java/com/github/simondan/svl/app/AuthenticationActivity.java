@@ -34,12 +34,9 @@ public class AuthenticationActivity extends AppCompatActivity
 
   private void _registerUser()
   {
-    if (formModel.allSatisfied())
-      server.registerUser(formModel.value(ID_FIRST_NAME), formModel.value(ID_LAST_NAME), formModel.value(ID_MAIL))
-          .doOnCompletion(this::_switchToPenaltyActivity)
-          .startCall();
-    else
-      formModel.toastAllUnsatisfied();
+    formModel.doOrToastUnsatisfied(values -> server.registerUser(values.id(ID_FIRST_NAME), values.id(ID_LAST_NAME), values.id(ID_MAIL))
+        .doOnCompletion(this::_switchToPenaltyActivity)
+        .startCall());
   }
 
   private void _switchToPenaltyActivity()
@@ -51,6 +48,6 @@ public class AuthenticationActivity extends AppCompatActivity
   private void _openDialog()
   {
     RestoreAuthenticationDialog restoreAuthenticationDialog = new RestoreAuthenticationDialog();
-    restoreAuthenticationDialog.show(getSupportFragmentManager(), "Server dialog");
+    restoreAuthenticationDialog.show(getSupportFragmentManager(), "Restore authentication dialog");
   }
 }

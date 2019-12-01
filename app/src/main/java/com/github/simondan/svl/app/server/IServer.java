@@ -3,6 +3,8 @@ package com.github.simondan.svl.app.server;
 import android.app.Activity;
 import com.github.simondan.svl.communication.auth.EUserRole;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -17,13 +19,15 @@ public interface IServer
 
   boolean isCredentialsStoreInitialized();
 
+  Optional<LastRestoreCode> getLastRestoreCodeData();
+
   EUserRole getUserRole();
 
   ICompletionCallback registerUser(String pFirstName, String pLastName, String pMail);
 
-  ICompletionCallback requestAuthRestoreCode(String pFirstName, String pLastName, String pMail);
+  ICompletionCallback requestRestoreCode(String pFirstName, String pLastName, String pMail);
 
-  ICompletionCallback restoreAuthentication(String pFirstName, String pLastName, String pRestoreCode);
+  ICompletionCallback restoreAuthentication(String pRestoreCode);
 
   IResultCallback<String> retrieveDummy();
 
@@ -41,5 +45,34 @@ public interface IServer
   interface IStarter
   {
     void startCall();
+  }
+
+  class LastRestoreCode
+  {
+    private final String firstName;
+    private final String lastName;
+    private final Instant timestamp;
+
+    LastRestoreCode(String pFirstName, String pLastName, Instant pTimestamp)
+    {
+      firstName = pFirstName;
+      lastName = pLastName;
+      timestamp = pTimestamp;
+    }
+
+    public String getFirstName()
+    {
+      return firstName;
+    }
+
+    public String getLastName()
+    {
+      return lastName;
+    }
+
+    public Instant getSendTimestamp()
+    {
+      return timestamp;
+    }
   }
 }

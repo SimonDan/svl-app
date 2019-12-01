@@ -9,7 +9,7 @@ import com.github.simondan.svl.communication.utils.SharedUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -21,7 +21,7 @@ import static com.github.simondan.svl.app.util.AndroidUtil.showErrorToast;
 public class FormModel
 {
   private final Window window;
-  private final _ComponentFinder componentFinder;
+  private final _IComponentFinder componentFinder;
   private final Map<EditText, String> identifiers = new LinkedHashMap<>();
   private final Map<EditText, _Condition> conditions = new LinkedHashMap<>();
 
@@ -91,13 +91,6 @@ public class FormModel
     return this;
   }
 
-  public String value(int pEditTextId)
-  {
-    return _retrieve(pEditTextId)
-        .filter(this::_notNullNotEmpty)
-        .orElseThrow(() -> new RuntimeException("Value for edit text with id " + pEditTextId + " is not satisfied!"));
-  }
-
   public boolean allSatisfied()
   {
     final boolean noFieldNull = identifiers.keySet().stream()
@@ -110,7 +103,22 @@ public class FormModel
     return noFieldNull && allConditionsSatisfied;
   }
 
-  public void toastAllUnsatisfied()
+  public void doOrToastUnsatisfied(Consumer<IValues> pActionBasedOnFromValues)
+  {
+    if (allSatisfied())
+      pActionBasedOnFromValues.accept(this::_getValue);
+    else
+      _toastAllUnsatisfied();
+  }
+
+  private String _getValue(int pEditTextId)
+  {
+    return _retrieve(pEditTextId)
+        .filter(this::_notNullNotEmpty)
+        .orElseThrow(() -> new RuntimeException("Value for edit text with id " + pEditTextId + " is not satisfied!"));
+  }
+
+  private void _toastAllUnsatisfied()
   {
     final List<String> unsatisfiedFields = identifiers.entrySet().stream()
         .filter(pEntry -> !_notNullNotEmpty(pEntry.getKey().getText().toString()))
@@ -157,7 +165,13 @@ public class FormModel
   }
 
   @FunctionalInterface
-  private interface _ComponentFinder
+  public interface IValues
+  {
+    String id(int pEditTexId);
+  }
+
+  @FunctionalInterface
+  private interface _IComponentFinder
   {
     View findById(int pId);
   }

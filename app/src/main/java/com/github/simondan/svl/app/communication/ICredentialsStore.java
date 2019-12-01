@@ -4,6 +4,8 @@ import android.content.Context;
 import com.github.simondan.svl.communication.auth.*;
 import okhttp3.FormBody;
 
+import java.time.Instant;
+
 /**
  * @author Simon Danner, 09.11.2019
  */
@@ -14,7 +16,13 @@ public interface ICredentialsStore
     return new SecurePreferencesCredentialsStore(pContext);
   }
 
-  boolean isInitialized();
+  boolean areUserDataInitialized();
+
+  boolean areCredentialsInitialized();
+
+  String getFirstName();
+
+  String getLastName();
 
   String getActiveToken();
 
@@ -22,9 +30,13 @@ public interface ICredentialsStore
 
   EUserRole getUserRole();
 
+  Instant getLastRestoreCodeTimestamp();
+
   void setUserData(String pFirstName, String pLastName);
 
   void saveNewAuthData(AuthenticationResponse pAuthenticationResponse);
+
+  void setLastRestoreCodeTimestamp(Instant pTimestamp);
 
   void reset();
 }
