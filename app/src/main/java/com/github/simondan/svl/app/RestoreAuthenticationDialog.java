@@ -29,6 +29,7 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
   private FormModel formSendCode;
   private FormModel formRestore;
   private View dialogView;
+  private CountDownTimer currentCountDown;
 
   @NonNull
   @Override
@@ -85,7 +86,10 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     final Function<Duration, String> textCreator = pRemaining -> "Ein Code wurde für " + pRestoreData.getUserName() +
         " gesendet!\nEr ist noch " + pRemaining.toMinutes() + " Minuten und " + pRemaining.getSeconds() % 60 + " Sekunden gültig!";
 
-    new CountDownTimer(Duration.between(Instant.now(), expirationTimestamp).toMillis(), 1000)
+    if (currentCountDown != null)
+      currentCountDown.cancel();
+
+    currentCountDown = new CountDownTimer(Duration.between(Instant.now(), expirationTimestamp).toMillis(), 1000)
     {
       @Override
       public void onTick(long pMillisUntilFinished)
