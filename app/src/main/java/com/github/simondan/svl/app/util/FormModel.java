@@ -5,8 +5,12 @@ import android.content.Context;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.github.simondan.svl.communication.utils.SharedUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.github.simondan.svl.app.util.AndroidUtil.showErrorToast;
@@ -19,6 +23,7 @@ public class FormModel
   private final Window window;
   private final _ComponentFinder componentFinder;
   private final Map<EditText, String> identifiers = new LinkedHashMap<>();
+  private final Map<EditText, _Condition> conditions = new LinkedHashMap<>();
 
   public static FormModel createForActivity(Activity pActivity)
   {
@@ -44,7 +49,34 @@ public class FormModel
 
   public FormModel addEditText(int pEditTextId, String pIdentifier)
   {
-    identifiers.put((EditText) componentFinder.findById(pEditTextId), pIdentifier);
+    return _addEditText(pEditTextId, pIdentifier, null, null);
+  }
+
+  public FormModel addEditText(int pEditTextId, String pIdentifier, Pattern pRegex)
+  {
+    final String errorMessage = "Muss " + pRegex + " entsprechen!";
+    return _addEditText(pEditTextId, pIdentifier, pValue -> SharedUtils.validatePattern(pRegex, pValue), errorMessage);
+  }
+
+  public FormModel addEditText(int pEditTextId, String pIdentifier, int pMinLength, int pMaxLength)
+  {
+    final String errorMessage = "Die Länge muss zwischen " + pMinLength + " und " + pMaxLength + " Zeichen liegen!";
+    return _addEditText(pEditTextId, pIdentifier, pValue -> pValue.length() >= pMinLength && pValue.length() <= pMaxLength, errorMessage);
+  }
+
+  public FormModel addEditText(int pEditTextId, String pIdentifier, int pExactLength)
+  {
+    final String errorMessage = "Die Länge muss genau " + pExactLength + " Zeichen betragen!";
+    return _addEditText(pEditTextId, pIdentifier, pValue -> pValue.length() == pExactLength, errorMessage);
+  }
+
+  private FormModel _addEditText(int pEditTextId, String pIdentifier, @Nullable Predicate<String> pCondition, @Nullable String pErrorMessage)
+  {
+    final EditText editText = (EditText) componentFinder.findById(pEditTextId);
+    identifiers.put(editText, pIdentifier);
+
+    if (pCondition != null)
+      conditions.put(editText, new _Condition(pCondition, pErrorMessage));
     return this;
   }
 
@@ -68,9 +100,14 @@ public class FormModel
 
   public boolean allSatisfied()
   {
-    return identifiers.keySet().stream()
+    final boolean noFieldNull = identifiers.keySet().stream()
         .map(pEditText -> pEditText.getText().toString())
         .allMatch(this::_notNullNotEmpty);
+
+    final boolean allConditionsSatisfied = conditions.entrySet().stream()
+        .allMatch(pEntry -> pEntry.getValue().valueVerifier.test(pEntry.getKey().getText().toString()));
+
+    return noFieldNull && allConditionsSatisfied;
   }
 
   public void toastAllUnsatisfied()
@@ -82,13 +119,19 @@ public class FormModel
 
     final String unsatisfiedFieldsString = String.join(", ", unsatisfiedFields);
 
-    if (unsatisfiedFields.isEmpty())
+    if (!unsatisfiedFields.isEmpty())
+    {
+      final String should = unsatisfiedFields.size() == 1 ? "darf" : "dürfen";
+      showErrorToast(window.getContext(), unsatisfiedFieldsString + " " + should + " nicht leer sein!");
       return;
+    }
 
-    final Context context = identifiers.keySet().iterator().next().getContext();
-    final String should = unsatisfiedFields.size() == 1 ? "darf" : "dürfen";
-
-    showErrorToast(context, unsatisfiedFieldsString + " " + should + " nicht leer sein!");
+    //If every field value is set, check other conditions
+    conditions.entrySet().stream()
+        .filter(pEntry -> !pEntry.getValue().valueVerifier.test(pEntry.getKey().getText().toString()))
+        .findFirst()
+        .map(pEntry -> identifiers.get(pEntry.getKey()) + " ist ungültig: " + pEntry.getValue().errorMessage)
+        .ifPresent(pErrorMessage -> showErrorToast(window.getContext(), pErrorMessage));
   }
 
   private Optional<String> _retrieve(int pEditTextId)
@@ -117,5 +160,17 @@ public class FormModel
   private interface _ComponentFinder
   {
     View findById(int pId);
+  }
+
+  private static class _Condition
+  {
+    private final Predicate<String> valueVerifier;
+    private final String errorMessage;
+
+    private _Condition(Predicate<String> pValueVerifier, String pErrorMessage)
+    {
+      valueVerifier = pValueVerifier;
+      errorMessage = pErrorMessage;
+    }
   }
 }

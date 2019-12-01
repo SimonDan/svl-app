@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.github.simondan.svl.app.server.IServer;
 import com.github.simondan.svl.app.util.FormModel;
 
+import static com.github.simondan.svl.communication.utils.SharedUtils.*;
+
 public class AuthenticationActivity extends AppCompatActivity
 {
   private static final int ID_FIRST_NAME = R.id.text_first_name;
@@ -23,9 +25,9 @@ public class AuthenticationActivity extends AppCompatActivity
 
     server = IServer.getForCurrentActivity(this);
     formModel = FormModel.createForActivity(this)
-        .addEditText(ID_FIRST_NAME, "Vorname")
-        .addEditText(ID_LAST_NAME, "Nachname")
-        .addEditText(ID_MAIL, "Email")
+        .addEditText(ID_FIRST_NAME, "Vorname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+        .addEditText(ID_LAST_NAME, "Nachname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+        .addEditText(ID_MAIL, "Email", VALID_EMAIL_ADDRESS_REGEX)
         .addButton(R.id.button_create_account, this::_registerUser)
         .addButton(R.id.button_request_code_dialog, this::_openDialog);
   }

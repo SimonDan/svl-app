@@ -9,8 +9,11 @@ import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import com.github.simondan.svl.app.server.IServer;
 import com.github.simondan.svl.app.util.FormModel;
+import com.github.simondan.svl.communication.utils.SharedUtils;
 
 import java.util.Objects;
+
+import static com.github.simondan.svl.communication.utils.SharedUtils.*;
 
 public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 {
@@ -40,23 +43,20 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
         .create();
 
     formSendCode = FormModel.createForView(view, dialog.getWindow())
-        .addEditText(ID_FIRST_NAME, "Vorname")
-        .addEditText(ID_LAST_NAME, "Nachname")
-        .addEditText(ID_MAIL, "Email")
+        .addEditText(ID_FIRST_NAME, "Vorname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+        .addEditText(ID_LAST_NAME, "Nachname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+        .addEditText(ID_MAIL, "Email", SharedUtils.VALID_EMAIL_ADDRESS_REGEX)
         .addButton(R.id.button_send_code, this::_sendRestoreCode);
 
     formRestore = FormModel.createForView(view, dialog.getWindow())
-        .addEditText(ID_CODE, "Code");
+        .addEditText(ID_CODE, "Code", CODE_LENGTH);
 
     dialog.setOnShowListener(arg -> {
       final Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 
       okButton.setOnClickListener(view1 -> {
         if (formRestore.allSatisfied())
-        {
           _restoreAuthentication();
-          dismiss();
-        }
         else
           formRestore.toastAllUnsatisfied();
       });
@@ -76,9 +76,8 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     else
     {
       server.requestAuthRestoreCode(formSendCode.value(ID_FIRST_NAME), formSendCode.value(ID_LAST_NAME), formSendCode.value(ID_MAIL))
+          .doOnCompletion(this::_showSuccessfulToast)
           .startCall();
-
-      Toast.makeText(getActivity(), "Wiederherstellungscode an Email wurde gesendet!", Toast.LENGTH_LONG).show();
     }
   }
 
@@ -87,9 +86,15 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     server.restoreAuthentication(formSendCode.value(ID_FIRST_NAME), formSendCode.value(ID_LAST_NAME), formRestore.value(ID_CODE))
         .doOnCompletion(() ->
                         {
+                          dismiss();
                           Intent intent = new Intent(getContext(), PenaltyActivity.class);
                           startActivity(intent);
                         })
         .startCall();
+  }
+
+  private void _showSuccessfulToast()
+  {
+    Toast.makeText(getActivity(), "Wiederherstellungscode per Email versandt!", Toast.LENGTH_LONG).show();
   }
 }

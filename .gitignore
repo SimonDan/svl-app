@@ -9,6 +9,7 @@
 /.idea/gradle.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/jarRepositories.xml
 .DS_Store
 /build
 /captures

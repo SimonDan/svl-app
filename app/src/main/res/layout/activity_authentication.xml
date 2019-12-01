@@ -105,7 +105,7 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="580dp"
       android:background="#FFC107"
-      android:text="Wiederherstellungscode anfordern"/>
+      android:text="Account Wiederherstellung"/>
 
 
 </FrameLayout>
