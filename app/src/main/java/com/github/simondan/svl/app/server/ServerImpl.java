@@ -8,7 +8,7 @@ import com.github.simondan.svl.app.*;
 import com.github.simondan.svl.app.communication.*;
 import com.github.simondan.svl.app.communication.exceptions.InternalCommunicationException;
 import com.github.simondan.svl.app.util.AndroidUtil;
-import com.github.simondan.svl.communication.auth.EUserRole;
+import com.github.simondan.svl.communication.auth.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -36,15 +36,14 @@ class ServerImpl implements IServer
   }
 
   @Override
-  public Optional<LastRestoreCode> getLastRestoreCodeData()
+  public Optional<LastRestoreData> getLastRestoreData()
   {
-    if (!credentialsStore.areCredentialsInitialized() && credentialsStore.areUserDataInitialized())
+    if (!credentialsStore.areCredentialsInitialized() && credentialsStore.isUserNameInitialized())
     {
-      final String firstName = credentialsStore.getFirstName();
-      final String lastName = credentialsStore.getLastName();
+      final UserName userName = credentialsStore.getUserName();
       final Instant timestamp = credentialsStore.getLastRestoreCodeTimestamp();
 
-      return Optional.of(new LastRestoreCode(firstName, lastName, timestamp));
+      return Optional.of(new LastRestoreData(userName, timestamp));
     }
 
     return Optional.empty();
@@ -60,33 +59,30 @@ class ServerImpl implements IServer
   }
 
   @Override
-  public ICompletionCallback registerUser(String pFirstName, String pLastName, String pMail)
+  public ICompletionCallback registerUser(UserName pUserName, String pMail)
   {
-    return new _NoResultTask(pRestInterface -> pRestInterface.registerNewUser(pFirstName, pLastName, pMail));
+    return new _NoResultTask(pRestInterface -> pRestInterface.registerNewUser(pUserName, pMail));
   }
 
   @Override
-  public ICompletionCallback requestRestoreCode(String pFirstName, String pLastName, String pMail)
+  public ICompletionCallback requestRestoreCode(UserName pUserName, String pMail)
   {
     final Runnable storeUserData = () ->
     {
-      credentialsStore.setUserData(pFirstName, pLastName);
+      credentialsStore.setUserName(pUserName);
       credentialsStore.setLastRestoreCodeTimestamp(Instant.now());
     };
 
-    return new _NoResultTask(pRestInterface -> pRestInterface.requestAuthRestoreCode(pFirstName, pLastName, pMail), storeUserData);
+    return new _NoResultTask(pRestInterface -> pRestInterface.requestAuthRestoreCode(pUserName, pMail), storeUserData);
   }
 
   @Override
   public ICompletionCallback restoreAuthentication(String pRestoreCode)
   {
-    if (!credentialsStore.areUserDataInitialized())
+    if (!credentialsStore.isUserNameInitialized())
       throw new InternalCommunicationException("No user data set for authentication recovery!");
 
-    final String firstName = credentialsStore.getFirstName();
-    final String lastName = credentialsStore.getLastName();
-
-    return new _NoResultTask(pRestInterface -> pRestInterface.restoreAuthentication(firstName, lastName, pRestoreCode));
+    return new _NoResultTask(pRestInterface -> pRestInterface.restoreAuthentication(credentialsStore.getUserName(), pRestoreCode));
   }
 
   @Override
@@ -114,11 +110,11 @@ class ServerImpl implements IServer
     public IStarter doOnCompletion(Runnable pAction)
     {
       final RestNetworkTask<Void> restTask = createRestTask(pVoid ->
-                                                            {
-                                                              if (internalCompletionAction != null)
-                                                                internalCompletionAction.run();
-                                                              pAction.run();
-                                                            });
+      {
+        if (internalCompletionAction != null)
+          internalCompletionAction.run();
+        pAction.run();
+      });
       return restTask::execute;
     }
   }
@@ -155,7 +151,8 @@ class ServerImpl implements IServer
     @Override
     public void startCall()
     {
-      createRestTask(pResult -> {
+      createRestTask(pResult ->
+      {
       }).execute();
     }
   }

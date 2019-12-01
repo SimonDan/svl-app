@@ -84,10 +84,10 @@ public class FormModel
   {
     final Button button = (Button) componentFinder.findById(pButtonId);
     button.setOnClickListener(pView ->
-                              {
-                                _closeKeyBoard();
-                                pAction.run();
-                              });
+    {
+      _closeKeyBoard();
+      pAction.run();
+    });
     return this;
   }
 

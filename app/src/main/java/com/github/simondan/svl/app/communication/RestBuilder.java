@@ -146,8 +146,8 @@ class RestBuilder<RESULT>
     public Call createAuthenticationCall()
     {
       return _createCall(_initRequest(DefaultConfig.AUTH_PATH)
-                             .post(credentialsStore.buildCredentialsForm())
-                             .build());
+          .post(credentialsStore.buildCredentialsForm())
+          .build());
     }
 
     private Call _createCall(Request pRequest)

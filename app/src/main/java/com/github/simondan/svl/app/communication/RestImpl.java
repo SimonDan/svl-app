@@ -2,7 +2,7 @@ package com.github.simondan.svl.app.communication;
 
 import android.content.Context;
 import com.github.simondan.svl.app.communication.exceptions.*;
-import com.github.simondan.svl.communication.auth.AuthenticationResponse;
+import com.github.simondan.svl.communication.auth.*;
 
 import java.util.Objects;
 
@@ -28,31 +28,31 @@ public class RestImpl implements IRestInterface
   }
 
   @Override
-  public void registerNewUser(String pFirstName, String pLastName, String pMail) throws RequestFailedException,
+  public void registerNewUser(UserName pUserName, String pMail) throws RequestFailedException,
       RequestTimeoutException
   {
-    _newAuthCall("register", pFirstName, pLastName, FORM_MAIL, pMail);
+    _newAuthCall("register", pUserName, FORM_MAIL, pMail);
   }
 
   @Override
-  public void requestAuthRestoreCode(String pFirstName, String pLastName, String pMail) throws RequestFailedException,
+  public void requestAuthRestoreCode(UserName pUserName, String pMail) throws RequestFailedException,
       RequestTimeoutException
   {
     RestBuilder.buildNoResultCall(context)
         .path(PATH_AUTH + "/requestCode")
         .method(EMethod.PUT)
         .formParam(pBuilder -> pBuilder
-            .add(FORM_FIRST_NAME, pFirstName)
-            .add(FORM_LAST_NAME, pLastName)
+            .add(FORM_FIRST_NAME, pUserName.getFirstName())
+            .add(FORM_LAST_NAME, pUserName.getLastName())
             .add(FORM_MAIL, pMail))
         .executeCallNoAuthentication();
   }
 
   @Override
-  public void restoreAuthentication(String pFirstName, String pLastName, String pRestoreCode) throws RequestFailedException,
+  public void restoreAuthentication(UserName pUserName, String pRestoreCode) throws RequestFailedException,
       RequestTimeoutException
   {
-    _newAuthCall("restore", pFirstName, pLastName, FORM_RESTORE_CODE, pRestoreCode);
+    _newAuthCall("restore", pUserName, FORM_RESTORE_CODE, pRestoreCode);
   }
 
   @Override
@@ -64,19 +64,19 @@ public class RestImpl implements IRestInterface
         .executeCall();
   }
 
-  private void _newAuthCall(String pAuthPath, String pFirstName, String pLastName, String pAdditionalFormKey, String pAdditionalFormValue)
+  private void _newAuthCall(String pAuthPath, UserName pUserName, String pAdditionalFormKey, String pAdditionalFormValue)
       throws RequestTimeoutException, RequestFailedException
   {
     final AuthenticationResponse authenticationResponse = RestBuilder.buildCall(context, AuthenticationResponse.class)
         .path(PATH_AUTH + "/" + pAuthPath)
         .method(EMethod.POST)
         .formParam(pBuilder -> pBuilder
-            .add(FORM_FIRST_NAME, pFirstName)
-            .add(FORM_LAST_NAME, pLastName)
+            .add(FORM_FIRST_NAME, pUserName.getFirstName())
+            .add(FORM_LAST_NAME, pUserName.getLastName())
             .add(pAdditionalFormKey, pAdditionalFormValue))
         .executeCallNoAuthentication();
 
-    credentialsStore.setUserData(pFirstName, pLastName);
+    credentialsStore.setUserName(pUserName);
     credentialsStore.saveNewAuthData(authenticationResponse);
   }
 }

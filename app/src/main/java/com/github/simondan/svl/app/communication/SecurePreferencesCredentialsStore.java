@@ -18,8 +18,7 @@ import static com.github.simondan.svl.app.communication.config.DefaultConfig.*;
 final class SecurePreferencesCredentialsStore implements ICredentialsStore
 {
   private static final String TOKEN_KEY = "tokenKey";
-  private static final String FIRST_NAME_KEY = "firstNameKey";
-  private static final String LAST_NAME_KEY = "lastNameKey";
+  private static final String USER_NAME_KEY = "userNameKey";
   private static final String NEXT_PASSWORD_KEY = "nextPasswordKey";
   private static final String USER_ROLE_KEY = "nextPasswordKey";
   private static final String RESTORE_TIMESTAMP_KEY = "restoreTimestampKey";
@@ -58,30 +57,30 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
-  public boolean areUserDataInitialized()
+  public boolean isUserNameInitialized()
   {
-    return sharedPreferences.contains(FIRST_NAME_KEY) && sharedPreferences.contains(LAST_NAME_KEY);
+    return sharedPreferences.contains(USER_NAME_KEY);
   }
 
   @Override
   public boolean areCredentialsInitialized()
   {
-    return sharedPreferences.contains(FIRST_NAME_KEY) &&
-        sharedPreferences.contains(LAST_NAME_KEY) &&
+    return sharedPreferences.contains(USER_NAME_KEY) &&
         sharedPreferences.contains(NEXT_PASSWORD_KEY) &&
         sharedPreferences.contains(TOKEN_KEY);
   }
 
   @Override
-  public String getFirstName()
+  public UserName getUserName()
   {
-    return _read(FIRST_NAME_KEY);
-  }
-
-  @Override
-  public String getLastName()
-  {
-    return _read(LAST_NAME_KEY);
+    try
+    {
+      return UserName.of(_read(USER_NAME_KEY));
+    }
+    catch (BadUserNameException pE)
+    {
+      throw new RuntimeException(pE);
+    }
   }
 
   @Override
@@ -93,9 +92,11 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   @Override
   public FormBody buildCredentialsForm()
   {
+    final UserName userName = getUserName();
+
     return new FormBody.Builder()
-        .add(AUTH_FORM_FIRST_NAME, _read(FIRST_NAME_KEY))
-        .add(AUTH_FORM_LAST_NAME, _read(LAST_NAME_KEY))
+        .add(AUTH_FORM_FIRST_NAME, userName.getFirstName())
+        .add(AUTH_FORM_LAST_NAME, userName.getLastName())
         .add(AUTH_FORM_PASSWORD, _read(NEXT_PASSWORD_KEY))
         .build();
   }
@@ -113,12 +114,10 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
-  public void setUserData(String pFirstName, String pLastName)
+  public void setUserName(UserName pUserName)
   {
     final SharedPreferences.Editor editor = sharedPreferences.edit();
-
-    editor.putString(FIRST_NAME_KEY, pFirstName);
-    editor.putString(LAST_NAME_KEY, pLastName);
+    editor.putString(USER_NAME_KEY, pUserName.toString());
     editor.apply();
   }
 
@@ -146,8 +145,7 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   {
     final SharedPreferences.Editor editor = sharedPreferences.edit();
 
-    editor.remove(FIRST_NAME_KEY);
-    editor.remove(LAST_NAME_KEY);
+    editor.remove(USER_NAME_KEY);
     editor.remove(TOKEN_KEY);
     editor.remove(NEXT_PASSWORD_KEY);
     editor.remove(USER_ROLE_KEY);

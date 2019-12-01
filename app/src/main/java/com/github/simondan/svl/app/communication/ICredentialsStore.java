@@ -16,13 +16,11 @@ public interface ICredentialsStore
     return new SecurePreferencesCredentialsStore(pContext);
   }
 
-  boolean areUserDataInitialized();
+  boolean isUserNameInitialized();
 
   boolean areCredentialsInitialized();
 
-  String getFirstName();
-
-  String getLastName();
+  UserName getUserName();
 
   String getActiveToken();
 
@@ -32,7 +30,7 @@ public interface ICredentialsStore
 
   Instant getLastRestoreCodeTimestamp();
 
-  void setUserData(String pFirstName, String pLastName);
+  void setUserName(UserName pUserName);
 
   void saveNewAuthData(AuthenticationResponse pAuthenticationResponse);
 

@@ -2,6 +2,7 @@ package com.github.simondan.svl.app.communication;
 
 import android.content.Context;
 import com.github.simondan.svl.app.communication.exceptions.*;
+import com.github.simondan.svl.communication.auth.UserName;
 
 /**
  * @author Simon Danner, 18.11.2019
@@ -13,13 +14,11 @@ public interface IRestInterface
     return new RestImpl(pContext);
   }
 
-  void registerNewUser(String pFirstName, String pLastName, String pMail) throws RequestTimeoutException, RequestFailedException;
+  void registerNewUser(UserName pUserName, String pMail) throws RequestTimeoutException, RequestFailedException;
 
-  void requestAuthRestoreCode(String pFirstName, String pLastName, String pMail) throws RequestFailedException,
-      RequestTimeoutException;
+  void requestAuthRestoreCode(UserName pUserName, String pMail) throws RequestFailedException, RequestTimeoutException;
 
-  void restoreAuthentication(String pFirstName, String pLastName, String pRestoreCode) throws RequestTimeoutException,
-      RequestFailedException;
+  void restoreAuthentication(UserName pUserName, String pRestoreCode) throws RequestTimeoutException, RequestFailedException;
 
   String getDummy() throws AuthenticationImpossibleException, RequestTimeoutException, RequestFailedException;
 }

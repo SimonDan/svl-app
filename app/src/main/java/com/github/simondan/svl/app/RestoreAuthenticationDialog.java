@@ -7,8 +7,9 @@ import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatDialogFragment;
-import com.github.simondan.svl.app.server.IServer;
+import com.github.simondan.svl.app.server.*;
 import com.github.simondan.svl.app.util.FormModel;
+import com.github.simondan.svl.communication.auth.*;
 import com.github.simondan.svl.communication.utils.SharedUtils;
 
 import java.time.*;
@@ -54,9 +55,10 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
         .addEditText(ID_CODE, "Code", CODE_LENGTH)
         .addButton(R.id.button_restore_account, this::_restoreAuthentication);
 
-    server.getLastRestoreCodeData().ifPresent(this::_enableRestoreButton);
+    server.getLastRestoreData().ifPresent(this::_enableRestoreButton);
 
-    dialog.setOnShowListener(arg -> {
+    dialog.setOnShowListener(arg ->
+    {
       //Set button color
       dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.dialogNegativeButton));
     });
@@ -64,13 +66,12 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     return dialog;
   }
 
-  private void _enableRestoreButton(IServer.LastRestoreCode pRestoreData)
+  private void _enableRestoreButton(LastRestoreData pRestoreData)
   {
     final Instant expirationTimestamp = pRestoreData.getSendTimestamp().plus(RESTORE_CODE_EXPIRATION_THRESHOLD);
     final TextView codeText = dialogView.findViewById(R.id.text_code);
 
-    final String textInvalidCode = "Der Wiederherstellungscode für " + pRestoreData.getFirstName() + " " + pRestoreData.getLastName() +
-        " ist abgelaufen und nicht mehr gültig!";
+    final String textInvalidCode = "Der Code für " + pRestoreData.getUserName() + " ist abgelaufen und nicht mehr gültig!";
 
     if (expirationTimestamp.isBefore(Instant.now()))
     {
@@ -81,9 +82,8 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     dialogView.findViewById(R.id.edit_restore_auth_code).setEnabled(true);
     dialogView.findViewById(R.id.button_restore_account).setEnabled(true);
 
-    final Function<Duration, String> textCreator = pRemaining -> "Ein Code wurde für " + pRestoreData.getFirstName() + " " +
-        pRestoreData.getLastName() + " gesendet!\nEr ist noch " + pRemaining.toMinutes() + " Minuten und " + pRemaining.getSeconds() % 60 +
-        " Sekunden gültig!";
+    final Function<Duration, String> textCreator = pRemaining -> "Ein Code wurde für " + pRestoreData.getUserName() +
+        " gesendet!\nEr ist noch " + pRemaining.toMinutes() + " Minuten und " + pRemaining.getSeconds() % 60 + " Sekunden gültig!";
 
     new CountDownTimer(Duration.between(Instant.now(), expirationTimestamp).toMillis(), 1000)
     {
@@ -105,24 +105,35 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 
   private void _sendRestoreCode()
   {
-    formSendCode.doOrToastUnsatisfied(values -> server.requestRestoreCode(values.id(ID_FIRST_NAME), values.id(ID_LAST_NAME), values.id(ID_MAIL))
-        .doOnCompletion(() ->
-                        {
-                          Toast.makeText(getActivity(), "Wiederherstellungscode per Email versandt!", Toast.LENGTH_LONG).show();
-                          server.getLastRestoreCodeData().ifPresent(this::_enableRestoreButton);
-                        })
-        .startCall());
+    formSendCode.doOrToastUnsatisfied(values ->
+    {
+      try
+      {
+        final UserName userName = UserName.of(values.id(ID_FIRST_NAME), values.id(ID_LAST_NAME));
+        server.requestRestoreCode(userName, values.id(ID_MAIL))
+            .doOnCompletion(() ->
+            {
+              Toast.makeText(getActivity(), "Wiederherstellungscode per Email versandt!", Toast.LENGTH_LONG).show();
+              server.getLastRestoreData().ifPresent(this::_enableRestoreButton);
+            })
+            .startCall();
+      }
+      catch (BadUserNameException pE)
+      {
+        throw new RuntimeException(pE);
+      }
+    });
   }
 
   private void _restoreAuthentication()
   {
     formRestore.doOrToastUnsatisfied(values -> server.restoreAuthentication(values.id(ID_CODE))
         .doOnCompletion(() ->
-                        {
-                          dismiss();
-                          Intent intent = new Intent(getContext(), PenaltyActivity.class);
-                          startActivity(intent);
-                        })
+        {
+          dismiss();
+          Intent intent = new Intent(getContext(), PenaltyActivity.class);
+          startActivity(intent);
+        })
         .startCall());
   }
 }

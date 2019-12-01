@@ -2,7 +2,6 @@ package com.github.simondan.svl.app;
 
 import android.content.Intent;
 import android.os.*;
-import android.view.Window;
 import androidx.appcompat.app.AppCompatActivity;
 import com.github.simondan.svl.app.server.IServer;
 
@@ -21,7 +20,8 @@ public class SplashActivity extends AppCompatActivity
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_splash);
 
-    new Handler().postDelayed(() -> {
+    new Handler().postDelayed(() ->
+    {
       final IServer server = IServer.getForCurrentActivity(SplashActivity.this);
       final Class<?> firstActivity = server.isCredentialsStoreInitialized() ? PenaltyActivity.class : AuthenticationActivity.class;
 

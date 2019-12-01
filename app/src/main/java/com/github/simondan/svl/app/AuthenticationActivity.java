@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import com.github.simondan.svl.app.server.IServer;
 import com.github.simondan.svl.app.util.FormModel;
+import com.github.simondan.svl.communication.auth.*;
 
 import static com.github.simondan.svl.communication.utils.SharedUtils.*;
 
@@ -34,9 +35,20 @@ public class AuthenticationActivity extends AppCompatActivity
 
   private void _registerUser()
   {
-    formModel.doOrToastUnsatisfied(values -> server.registerUser(values.id(ID_FIRST_NAME), values.id(ID_LAST_NAME), values.id(ID_MAIL))
-        .doOnCompletion(this::_switchToPenaltyActivity)
-        .startCall());
+    formModel.doOrToastUnsatisfied(values ->
+    {
+      try
+      {
+        final UserName userName = UserName.of(values.id(ID_FIRST_NAME), values.id(ID_LAST_NAME));
+        server.registerUser(userName, values.id(ID_MAIL))
+            .doOnCompletion(this::_switchToPenaltyActivity)
+            .startCall();
+      }
+      catch (BadUserNameException pE)
+      {
+        throw new RuntimeException(pE);
+      }
+    });
   }
 
   private void _switchToPenaltyActivity()
