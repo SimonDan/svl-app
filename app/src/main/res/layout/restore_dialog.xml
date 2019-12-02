@@ -21,12 +21,12 @@
         android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
         android:hint="Vorname"
-        android:inputType="text"
+        android:inputType="textPersonName|text"
         android:textColorHighlight="#FFEB3B"
         android:textColorLink="#FFC107"
         android:textCursorDrawable="@android:color/holo_orange_light"
         android:textSize="12sp"
-        android:textStyle="italic" />
+        android:textStyle="italic"/>
 
     <EditText
         android:id="@+id/edit_restore_auth_last_name"
@@ -36,12 +36,12 @@
         android:backgroundTint="@android:color/holo_orange_light"
         android:ems="10"
         android:hint="Nachname"
-        android:inputType="text"
+        android:inputType="textPersonName"
         android:textColorHighlight="#FFEB3B"
         android:textColorLink="#FFC107"
         android:textCursorDrawable="@android:color/holo_orange_light"
         android:textSize="12sp"
-        android:textStyle="italic" />
+        android:textStyle="italic"/>
 
     <EditText
         android:id="@+id/edit_restore_auth_mail"
