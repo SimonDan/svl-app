@@ -3,21 +3,21 @@ package com.github.simondan.svl.app.communication;
 import android.content.Context;
 import com.github.simondan.svl.app.communication.config.*;
 import com.github.simondan.svl.app.communication.exceptions.*;
-import com.google.gson.Gson;
+import com.github.simondan.svl.communication.auth.IAuthenticationRequest;
 import okhttp3.*;
 
 import javax.net.ssl.*;
 import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+
+import static com.github.simondan.svl.communication.utils.GsonFactory.GSON;
 
 /**
  * @author Simon Danner, 16.11.2019
  */
 class RestBuilder<RESULT>
 {
-  private static final Gson GSON = new Gson();
   private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
   private final ICredentialsStore credentialsStore;
@@ -55,17 +55,9 @@ class RestBuilder<RESULT>
     return this;
   }
 
-  RestBuilder<RESULT> jsonParam(Object pParam)
+  RestBuilder<RESULT> jsonParam(Object pParam, Class<?> pParamType)
   {
-    param = RequestBody.create(JSON_MEDIA_TYPE, GSON.toJson(pParam));
-    return this;
-  }
-
-  RestBuilder<RESULT> formParam(Consumer<FormBody.Builder> pBuilderConsumer)
-  {
-    final FormBody.Builder builder = new FormBody.Builder();
-    pBuilderConsumer.accept(builder);
-    param = builder.build();
+    param = RequestBody.create(JSON_MEDIA_TYPE, GSON.toJson(pParam, pParamType));
     return this;
   }
 
@@ -108,12 +100,6 @@ class RestBuilder<RESULT>
     @Override
     public Request.Builder prepareRequest()
     {
-      //if (resultType != Void.class)
-      //{
-      //  Objects.requireNonNull(resultMediaType, "No result media type provided!");
-      //  return webTarget.request(resultMediaType);
-      //}
-
       return _initRequest(path);
     }
 
@@ -145,15 +131,16 @@ class RestBuilder<RESULT>
     @Override
     public Call createAuthenticationCall()
     {
+      final IAuthenticationRequest authRequest = credentialsStore.buildAuthenticationRequest();
       return _createCall(_initRequest(DefaultConfig.AUTH_PATH)
-          .post(credentialsStore.buildCredentialsForm())
+          .post(RequestBody.create(JSON_MEDIA_TYPE, GSON.toJson(authRequest, IAuthenticationRequest.class)))
           .build());
     }
 
     private Call _createCall(Request pRequest)
     {
       return createUnsafeOkHttpClientBuilder()
-          //.callTimeout(timeoutConfig.getTimeout(), timeoutConfig.getTimeUnit())
+          .callTimeout(timeoutConfig.getTimeout(), timeoutConfig.getTimeUnit())
           .build()
           .newCall(pRequest);
     }

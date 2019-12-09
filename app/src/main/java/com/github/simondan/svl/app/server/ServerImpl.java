@@ -59,21 +59,21 @@ class ServerImpl implements IServer
   }
 
   @Override
-  public ICompletionCallback registerUser(UserName pUserName, String pMail)
+  public ICompletionCallback registerUser(IRegistrationRequest pRegistrationRequest)
   {
-    return new _NoResultTask(pRestInterface -> pRestInterface.registerNewUser(pUserName, pMail));
+    return new _NoResultTask(pRestInterface -> pRestInterface.registerNewUser(pRegistrationRequest));
   }
 
   @Override
-  public ICompletionCallback requestRestoreCode(UserName pUserName, String pMail)
+  public ICompletionCallback requestRestoreCode(IRegistrationRequest pRegistrationData)
   {
     final Runnable storeUserData = () ->
     {
-      credentialsStore.setUserName(pUserName);
+      credentialsStore.setUserName(pRegistrationData.getUserName());
       credentialsStore.setLastRestoreCodeTimestamp(Instant.now());
     };
 
-    return new _NoResultTask(pRestInterface -> pRestInterface.requestAuthRestoreCode(pUserName, pMail), storeUserData);
+    return new _NoResultTask(pRestInterface -> pRestInterface.requestAuthRestoreCode(pRegistrationData), storeUserData);
   }
 
   @Override
@@ -82,7 +82,22 @@ class ServerImpl implements IServer
     if (!credentialsStore.isUserNameInitialized())
       throw new InternalCommunicationException("No user data set for authentication recovery!");
 
-    return new _NoResultTask(pRestInterface -> pRestInterface.restoreAuthentication(credentialsStore.getUserName(), pRestoreCode));
+    final IRestoreAuthRequest request = new IRestoreAuthRequest()
+    {
+      @Override
+      public UserName getUserName()
+      {
+        return credentialsStore.getUserName();
+      }
+
+      @Override
+      public String getRestoreCode()
+      {
+        return pRestoreCode;
+      }
+    };
+
+    return new _NoResultTask(pRestInterface -> pRestInterface.restoreAuthentication(request));
   }
 
   @Override

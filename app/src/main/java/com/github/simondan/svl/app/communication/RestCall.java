@@ -4,18 +4,17 @@ import com.github.simondan.svl.app.communication.config.TimeoutConfig;
 import com.github.simondan.svl.app.communication.exceptions.*;
 import com.github.simondan.svl.communication.ESupportedHttpStatus;
 import com.github.simondan.svl.communication.auth.AuthenticationResponse;
-import com.google.gson.Gson;
 import okhttp3.*;
 
 import java.io.IOException;
+
+import static com.github.simondan.svl.communication.utils.GsonFactory.GSON;
 
 /**
  * @author Simon Danner, 09.11.2019
  */
 class RestCall<RESULT>
 {
-  private static final Gson GSON = new Gson();
-
   private final TimeoutConfig timeoutConfig;
   private final ICredentialsStore credentialsStore;
   private final IRestCallConfig<RESULT> callConfig;

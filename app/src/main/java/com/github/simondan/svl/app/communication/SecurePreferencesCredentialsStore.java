@@ -3,14 +3,11 @@ package com.github.simondan.svl.app.communication;
 import android.content.*;
 import androidx.security.crypto.*;
 import com.github.simondan.svl.communication.auth.*;
-import okhttp3.FormBody;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.Optional;
-
-import static com.github.simondan.svl.app.communication.config.DefaultConfig.*;
 
 /**
  * @author Simon Danner, 16.11.2019
@@ -90,15 +87,24 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
-  public FormBody buildCredentialsForm()
+  public IAuthenticationRequest buildAuthenticationRequest()
   {
     final UserName userName = getUserName();
 
-    return new FormBody.Builder()
-        .add(AUTH_FORM_FIRST_NAME, userName.getFirstName())
-        .add(AUTH_FORM_LAST_NAME, userName.getLastName())
-        .add(AUTH_FORM_PASSWORD, _read(NEXT_PASSWORD_KEY))
-        .build();
+    return new IAuthenticationRequest()
+    {
+      @Override
+      public UserName getUserName()
+      {
+        return userName;
+      }
+
+      @Override
+      public String getPassword()
+      {
+        return _read(NEXT_PASSWORD_KEY);
+      }
+    };
   }
 
   @Override

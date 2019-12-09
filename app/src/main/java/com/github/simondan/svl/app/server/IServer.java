@@ -22,9 +22,9 @@ public interface IServer
 
   EUserRole getUserRole();
 
-  ICompletionCallback registerUser(UserName pUserName, String pMail);
+  ICompletionCallback registerUser(IRegistrationRequest pRegistrationRequest);
 
-  ICompletionCallback requestRestoreCode(UserName pUserName, String pMail);
+  ICompletionCallback requestRestoreCode(IRegistrationRequest pRegistrationData);
 
   ICompletionCallback restoreAuthentication(String pRestoreCode);
 

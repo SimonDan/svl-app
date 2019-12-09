@@ -2,7 +2,6 @@ package com.github.simondan.svl.app.communication;
 
 import android.content.Context;
 import com.github.simondan.svl.communication.auth.*;
-import okhttp3.FormBody;
 
 import java.time.Instant;
 
@@ -24,7 +23,7 @@ public interface ICredentialsStore
 
   String getActiveToken();
 
-  FormBody buildCredentialsForm();
+  IAuthenticationRequest buildAuthenticationRequest();
 
   EUserRole getUserRole();
 

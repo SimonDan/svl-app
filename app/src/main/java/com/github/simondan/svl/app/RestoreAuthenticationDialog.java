@@ -8,15 +8,15 @@ import android.widget.*;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import com.github.simondan.svl.app.server.*;
-import com.github.simondan.svl.app.util.FormModel;
-import com.github.simondan.svl.communication.auth.*;
-import com.github.simondan.svl.communication.utils.SharedUtils;
+import com.github.simondan.svl.app.util.*;
+import com.github.simondan.svl.communication.auth.IRegistrationRequest;
 
 import java.time.*;
 import java.util.Objects;
 import java.util.function.Function;
 
 import static com.github.simondan.svl.communication.utils.SharedUtils.*;
+import static java.util.function.Function.identity;
 
 public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 {
@@ -26,8 +26,8 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
   private static final int ID_CODE = R.id.edit_restore_auth_code;
 
   private IServer server;
-  private FormModel formSendCode;
-  private FormModel formRestore;
+  private FormModel<IRegistrationRequest> formSendCode;
+  private FormModel<String> formRestore;
   private View dialogView;
   private CountDownTimer currentCountDown;
 
@@ -46,14 +46,21 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
         .setNegativeButton("Schließen", (dialogInterface, i) -> dialogInterface.dismiss())
         .create();
 
-    formSendCode = FormModel.createForView(dialogView, dialog.getWindow())
-        .addEditText(ID_FIRST_NAME, "Vorname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-        .addEditText(ID_LAST_NAME, "Nachname", MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-        .addEditText(ID_MAIL, "Email", SharedUtils.VALID_EMAIL_ADDRESS_REGEX)
+    formSendCode = FormModel.createForView(dialogView, dialog.getWindow(), IRegistrationRequest.class)
+        .initFieldAddition(ID_FIRST_NAME, "Vorname", IRegistrationRequest::getUserName)
+        .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+        .combineWithField(ID_LAST_NAME, "Nachname")
+        .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
+        .doAddFields(pValues -> CommonUtil.newUserName(pValues[0], pValues[1]))
+        .initStringFieldAddition(ID_MAIL, "Email", IRegistrationRequest::getMailAddress)
+        .requiresRegex(VALID_EMAIL_ADDRESS_REGEX)
+        .doAddStringField()
         .addButton(R.id.button_send_code, this::_sendRestoreCode);
 
-    formRestore = FormModel.createForView(dialogView, dialog.getWindow())
-        .addEditText(ID_CODE, "Code", CODE_LENGTH)
+    formRestore = FormModel.createForView(dialogView, dialog.getWindow(), String.class)
+        .initStringFieldAddition(ID_CODE, "Code", identity())
+        .requiresExactLength(CODE_LENGTH)
+        .doAddStringField()
         .addButton(R.id.button_restore_account, this::_restoreAuthentication);
 
     server.getLastRestoreData().ifPresent(this::_enableRestoreButton);
@@ -109,29 +116,18 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 
   private void _sendRestoreCode()
   {
-    formSendCode.doOrToastUnsatisfied(values ->
-    {
-      try
-      {
-        final UserName userName = UserName.of(values.id(ID_FIRST_NAME), values.id(ID_LAST_NAME));
-        server.requestRestoreCode(userName, values.id(ID_MAIL))
-            .doOnCompletion(() ->
-            {
-              Toast.makeText(getActivity(), "Wiederherstellungscode per Email versandt!", Toast.LENGTH_LONG).show();
-              server.getLastRestoreData().ifPresent(this::_enableRestoreButton);
-            })
-            .startCall();
-      }
-      catch (BadUserNameException pE)
-      {
-        throw new RuntimeException(pE);
-      }
-    });
+    formSendCode.doOrToastUnsatisfied(pRequest -> server.requestRestoreCode(pRequest)
+        .doOnCompletion(() ->
+        {
+          Toast.makeText(getActivity(), "Wiederherstellungscode per Email versandt!", Toast.LENGTH_LONG).show();
+          server.getLastRestoreData().ifPresent(this::_enableRestoreButton);
+        })
+        .startCall());
   }
 
   private void _restoreAuthentication()
   {
-    formRestore.doOrToastUnsatisfied(values -> server.restoreAuthentication(values.id(ID_CODE))
+    formRestore.doOrToastUnsatisfied(pCode -> server.restoreAuthentication(pCode)
         .doOnCompletion(() ->
         {
           dismiss();
