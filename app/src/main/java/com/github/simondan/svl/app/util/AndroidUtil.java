@@ -1,8 +1,12 @@
 package com.github.simondan.svl.app.util;
 
-import android.content.Context;
-import android.graphics.Color;
-import android.widget.*;
+import android.view.View;
+import android.widget.TextView;
+import androidx.core.content.ContextCompat;
+import com.github.simondan.svl.app.R;
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Objects;
 
 /**
  * @author Simon Danner, 24.11.2019
@@ -13,11 +17,17 @@ public final class AndroidUtil
   {
   }
 
-  public static void showErrorToast(Context pContext, String pMessage)
+  public static void showError(View pView, String pMessage)
   {
-    final Toast toast = Toast.makeText(pContext, pMessage, Toast.LENGTH_LONG);
-    final TextView text = toast.getView().findViewById(android.R.id.message);
-    text.setTextColor(Color.RED);
-    toast.show();
+    Objects.requireNonNull(pView, "The view to show an error for is null!");
+    final Snackbar snackbar = Snackbar.make(pView, pMessage, Snackbar.LENGTH_LONG);
+    final View snackbarView = snackbar.getView();
+    snackbarView.setBackgroundResource(R.color.grey);
+
+    final TextView text = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+    text.setBackgroundResource(R.color.grey);
+    text.setTextColor(ContextCompat.getColor(pView.getContext(), R.color.errorRed));
+
+    snackbar.show();
   }
 }

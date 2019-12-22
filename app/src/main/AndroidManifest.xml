@@ -17,6 +17,7 @@
 
     <activity
         android:name=".SplashActivity"
+        android:screenOrientation="portrait"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
         android:launchMode="singleInstance"
         android:noHistory="true">
@@ -35,6 +36,7 @@
 
     <activity
         android:name=".AuthenticationActivity"
+        android:screenOrientation="portrait"
         android:label="@string/title_activity_authentication"
         android:theme="@style/AppTheme.NoActionBar"/>
 

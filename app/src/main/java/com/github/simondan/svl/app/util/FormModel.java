@@ -1,31 +1,19 @@
 package com.github.simondan.svl.app.util;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.*;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
-import com.github.simondan.svl.communication.utils.SharedUtils;
+import android.widget.EditText;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static com.github.simondan.svl.app.util.AndroidUtil.showErrorToast;
+import java.util.function.Function;
 
 /**
  * @author Simon Danner, 23.11.2019
  */
-public class FormModel<SERVER_PARAM>
+public class FormModel<SERVER_PARAM> extends AbstractFromModel<SERVER_PARAM, FormModel<SERVER_PARAM>>
 {
-  private final Window window;
-  private final _IComponentFinder componentFinder;
-  private final Class<SERVER_PARAM> serverParamType;
   private final _MethodDeterminer methodDeterminer;
-  private final Map<EditText, String> fieldDescriptions = new LinkedHashMap<>();
-  private final Map<EditText, _Condition> fieldVerifiers = new LinkedHashMap<>();
   private final Map<Method, List<EditText>> serverParamMethodMapping = new LinkedHashMap<>();
   private final Map<Method, Function<String[], ?>> serverParamTypeMappings = new LinkedHashMap<>();
 
@@ -41,107 +29,36 @@ public class FormModel<SERVER_PARAM>
 
   private FormModel(Activity pActivity, Class<SERVER_PARAM> pServerParamType)
   {
-    window = pActivity.getWindow();
-    componentFinder = pActivity::findViewById;
-    serverParamType = pServerParamType;
+    super(pActivity, pServerParamType);
     methodDeterminer = new _MethodDeterminer(pServerParamType);
   }
 
   private FormModel(View pView, Window pWindow, Class<SERVER_PARAM> pServerParamType)
   {
-    window = pWindow;
-    componentFinder = pView::findViewById;
-    serverParamType = pServerParamType;
+    super(pView, pWindow, pServerParamType);
     methodDeterminer = new _MethodDeterminer(pServerParamType);
   }
 
-  public SingleFieldAdditionString initStringFieldAddition(int pEditTextId, String pDescription, Function<SERVER_PARAM, String> pMethodMapping)
+  public SingleFieldAdditionString configureStringFieldAddition(int pEditTextId, String pDescription, Function<SERVER_PARAM, String> pMethodMapping)
   {
     return new SingleFieldAdditionString(pEditTextId, pDescription, pMethodMapping);
   }
 
-  public <VALUE> SingleFieldAddition<VALUE> initFieldAddition(int pEditTextId, String pDescription, Function<SERVER_PARAM, VALUE> pMethodMapping)
+  public <VALUE> SingleFieldAddition<VALUE> configureFieldAddition(int pEditTextId, String pDescription, Function<SERVER_PARAM, VALUE> pMethodMapping)
   {
     return new SingleFieldAddition<>(pEditTextId, pDescription, pMethodMapping);
   }
 
-  public FormModel<SERVER_PARAM> addButton(int pButtonId, Runnable pAction)
+  @Override
+  protected SERVER_PARAM retrieveServerParamFromForm()
   {
-    final Button button = (Button) componentFinder.findById(pButtonId);
-    button.setOnClickListener(pView ->
-    {
-      _closeKeyBoard();
-      pAction.run();
-    });
-    return this;
-  }
-
-  public boolean allSatisfied()
-  {
-    final boolean noFieldNull = fieldDescriptions.keySet().stream()
-        .map(pEditText -> pEditText.getText().toString())
-        .allMatch(this::_notNullNotEmpty);
-
-    final boolean allConditionsSatisfied = fieldVerifiers.entrySet().stream()
-        .allMatch(pEntry -> pEntry.getValue().valueVerifier.test(pEntry.getKey().getText().toString()));
-
-    return noFieldNull && allConditionsSatisfied;
-  }
-
-  public void doOrToastUnsatisfied(Consumer<SERVER_PARAM> pActionBasedOnResult)
-  {
-    if (allSatisfied())
-    {
-      final SERVER_PARAM serverParamProxy = _createServerParamProxy((proxy, method, args) ->
-          Optional.ofNullable(serverParamMethodMapping.get(method))
-              .map(pFields -> serverParamTypeMappings.get(method)
-                  .apply(pFields.stream()
-                      .map(pEditText -> pEditText.getText().toString())
-                      .toArray(String[]::new)))
-              .orElse(null));
-
-      pActionBasedOnResult.accept(serverParamProxy);
-    }
-    else
-      _toastAllUnsatisfied();
-  }
-
-  private void _toastAllUnsatisfied()
-  {
-    final List<String> unsatisfiedFields = fieldDescriptions.entrySet().stream()
-        .filter(pEntry -> !_notNullNotEmpty(pEntry.getKey().getText().toString()))
-        .map(Map.Entry::getValue)
-        .collect(Collectors.toList());
-
-    final String unsatisfiedFieldsString = String.join(", ", unsatisfiedFields);
-
-    if (!unsatisfiedFields.isEmpty())
-    {
-      final String should = unsatisfiedFields.size() == 1 ? "darf" : "dürfen";
-      showErrorToast(window.getContext(), unsatisfiedFieldsString + " " + should + " nicht leer sein!");
-      return;
-    }
-
-    //If every field value is set, check other conditions
-    fieldVerifiers.entrySet().stream()
-        .filter(pEntry -> !pEntry.getValue().valueVerifier.test(pEntry.getKey().getText().toString()))
-        .findFirst()
-        .map(pEntry -> fieldDescriptions.get(pEntry.getKey()) + " ist ungültig: " + pEntry.getValue().errorMessage)
-        .ifPresent(pErrorMessage -> showErrorToast(window.getContext(), pErrorMessage));
-  }
-
-  private boolean _notNullNotEmpty(String pValue)
-  {
-    return pValue != null && !pValue.isEmpty();
-  }
-
-  private void _closeKeyBoard()
-  {
-    final InputMethodManager inputManager = (InputMethodManager) window.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-    final View currentFocus = window.getCurrentFocus();
-
-    if (inputManager != null && currentFocus != null)
-      inputManager.hideSoftInputFromWindow(currentFocus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    return _createServerParamProxy((proxy, method, args) ->
+        Optional.ofNullable(serverParamMethodMapping.get(method))
+            .map(pFields -> serverParamTypeMappings.get(method)
+                .apply(pFields.stream()
+                    .map(pEditText -> pEditText.getText().toString())
+                    .toArray(String[]::new)))
+            .orElse(null));
   }
 
   private SERVER_PARAM _createServerParamProxy(InvocationHandler pInvocationHandler)
@@ -209,62 +126,25 @@ public class FormModel<SERVER_PARAM>
   }
 
   private abstract class _AbstractFieldAddition<VALUE, ADDITION extends _AbstractFieldAddition<VALUE, ADDITION>>
+      extends AbstractFieldAddition<VALUE, ADDITION>
   {
-    protected final EditText editText;
-    protected final String description;
     protected final Function<SERVER_PARAM, VALUE> methodMapping;
-    protected final List<_Condition> conditions = new ArrayList<>();
 
     private _AbstractFieldAddition(int pEditTextId, String pDescription, Function<SERVER_PARAM, VALUE> pMethodMapping)
     {
-      editText = (EditText) componentFinder.findById(pEditTextId);
-      description = pDescription;
+      super(pEditTextId, pDescription);
       methodMapping = pMethodMapping;
-    }
-
-    public ADDITION requiresLengthBetween(int pMinLength, int pMaxLength)
-    {
-      final String errorMessage = "Die Länge muss zwischen " + pMinLength + " und " + pMaxLength + " Zeichen liegen!";
-      conditions.add(new _Condition(pValue -> pValue.length() >= pMinLength && pValue.length() <= pMaxLength, errorMessage));
-
-      //noinspection unchecked
-      return (ADDITION) this;
-    }
-
-    public ADDITION requiresExactLength(int pExactLength)
-    {
-      final String errorMessage = "Die Länge muss genau " + pExactLength + " Zeichen betragen!";
-      conditions.add(new _Condition(pValue -> pValue.length() == pExactLength, errorMessage));
-
-      //noinspection unchecked
-      return (ADDITION) this;
-    }
-
-    public ADDITION requiresRegex(Pattern pRegex)
-    {
-      final String errorMessage = "Das Format von " + description + " ist ungültig!";
-      conditions.add(new _Condition(pValue -> SharedUtils.validatePattern(pRegex, pValue), errorMessage));
-
-      //noinspection unchecked
-      return (ADDITION) this;
     }
 
     protected Method doAddSingleAddition(_AbstractFieldAddition<VALUE, ?> pAddition)
     {
-      fieldDescriptions.put(pAddition.editText, pAddition.description);
-      pAddition.conditions.forEach(pCondition -> fieldVerifiers.put(editText, pCondition));
+      registerAddition(pAddition);
 
       final Method method = methodDeterminer.determineCalledMethod(pAddition.methodMapping);
       serverParamMethodMapping.computeIfAbsent(method, m -> new ArrayList<>()).add(pAddition.editText);
 
       return method;
     }
-  }
-
-  @FunctionalInterface
-  private interface _IComponentFinder
-  {
-    View findById(int pId);
   }
 
   private class _MethodDeterminer
@@ -294,18 +174,6 @@ public class FormModel<SERVER_PARAM>
       final Method result = calledMethod;
       calledMethod = null;
       return result;
-    }
-  }
-
-  private static class _Condition
-  {
-    private final Predicate<String> valueVerifier;
-    private final String errorMessage;
-
-    private _Condition(Predicate<String> pValueVerifier, String pErrorMessage)
-    {
-      valueVerifier = pValueVerifier;
-      errorMessage = pErrorMessage;
     }
   }
 }

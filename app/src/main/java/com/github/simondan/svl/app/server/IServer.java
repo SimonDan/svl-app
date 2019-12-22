@@ -1,6 +1,7 @@
 package com.github.simondan.svl.app.server;
 
 import android.app.Activity;
+import android.view.Window;
 import com.github.simondan.svl.communication.auth.*;
 
 import java.util.Optional;
@@ -13,7 +14,12 @@ public interface IServer
 {
   static IServer getForCurrentActivity(Activity pCurrentActivity)
   {
-    return new ServerImpl(pCurrentActivity);
+    return new ServerImpl(pCurrentActivity, pCurrentActivity.getWindow());
+  }
+
+  static IServer getForCurrentActivityAndWindow(Activity pCurrentActivity, Window pWindow)
+  {
+    return new ServerImpl(pCurrentActivity, pWindow);
   }
 
   boolean isCredentialsStoreInitialized();

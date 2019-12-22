@@ -2,12 +2,10 @@ package com.github.simondan.svl.app.server;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.view.View;
-import android.widget.ProgressBar;
+import android.view.*;
 import com.github.simondan.svl.app.*;
 import com.github.simondan.svl.app.communication.*;
 import com.github.simondan.svl.app.communication.exceptions.InternalCommunicationException;
-import com.github.simondan.svl.app.util.AndroidUtil;
 import com.github.simondan.svl.communication.auth.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,17 +13,21 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static com.github.simondan.svl.app.util.AndroidUtil.showError;
+
 /**
  * @author Simon Danner, 18.11.2019
  */
 class ServerImpl implements IServer
 {
   private final Activity currentActivity;
+  private final Window currentWindow;
   private final ICredentialsStore credentialsStore;
 
-  ServerImpl(Activity pCurrentActivity)
+  ServerImpl(Activity pCurrentActivity, Window pCurrentWindow)
   {
     currentActivity = pCurrentActivity;
+    currentWindow = pCurrentWindow;
     credentialsStore = ICredentialsStore.createForContext(currentActivity);
   }
 
@@ -175,6 +177,7 @@ class ServerImpl implements IServer
   private class _Callback<RESULT> implements IRestTaskCallback<RESULT>
   {
     private final Consumer<RESULT> resultConsumer;
+    private int priorVisibility;
 
     private _Callback(Consumer<RESULT> pResultConsumer)
     {
@@ -184,13 +187,16 @@ class ServerImpl implements IServer
     @Override
     public void onTaskStart()
     {
-      _changeProgressBarVisibility(View.VISIBLE);
+      final View progressOverlay = currentWindow.findViewById(R.id.progress_overlay);
+      priorVisibility = progressOverlay.getVisibility();
+      progressOverlay.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onTaskEnd()
     {
-      _changeProgressBarVisibility(View.INVISIBLE);
+      final View progressOverlay = currentWindow.findViewById(R.id.progress_overlay);
+      progressOverlay.setVisibility(priorVisibility);
     }
 
     @Override
@@ -219,15 +225,9 @@ class ServerImpl implements IServer
       resultConsumer.accept(pResult);
     }
 
-    private void _changeProgressBarVisibility(int pVisibility)
-    {
-      final ProgressBar progressBar = currentActivity.findViewById(R.id.progress_bar);
-      progressBar.setVisibility(pVisibility);
-    }
-
     private void _showToast(String pMessage)
     {
-      _onUi(() -> AndroidUtil.showErrorToast(currentActivity, pMessage));
+      _onUi(() -> showError(currentWindow.findViewById(android.R.id.content), pMessage));
     }
 
     private void _onUi(Runnable pOnUiAction)

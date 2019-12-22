@@ -3,4 +3,16 @@
   <string name="action_settings">Settings</string>
   <string name="title_activity_authentication">AuthenticationActivity</string>
   <string name="title_activity_penalty">PenaltyActivity</string>
+
+  <string name="button_create_account">Account erstellen</string>
+  <string name="button_restore_account">Account Wiederherstellung</string>
+  <string name="button_send_code">Wiederherstellungscode senden</string>
+  <string name="button_do_restore_account">Account wiederherstellen</string>
+
+  <string name="hint_first_name">Vorname</string>
+  <string name="hint_last_name">Nachname</string>
+  <string name="hint_mail">Email</string>
+  <string name="hint_restore_cde">Wiederherstellungscode</string>
+
+  <string name="text_should_send_code">Lass dir zuerst einen Code per Mail zusenden!</string>
 </resources>

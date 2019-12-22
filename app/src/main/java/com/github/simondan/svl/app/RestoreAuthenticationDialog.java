@@ -7,6 +7,7 @@ import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.core.content.ContextCompat;
 import com.github.simondan.svl.app.server.*;
 import com.github.simondan.svl.app.util.*;
 import com.github.simondan.svl.communication.auth.IRegistrationRequest;
@@ -16,7 +17,6 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.github.simondan.svl.communication.utils.SharedUtils.*;
-import static java.util.function.Function.identity;
 
 public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 {
@@ -27,7 +27,7 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 
   private IServer server;
   private FormModel<IRegistrationRequest> formSendCode;
-  private FormModel<String> formRestore;
+  private SingleStringFormModel formRestore;
   private View dialogView;
   private CountDownTimer currentCountDown;
 
@@ -35,32 +35,32 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
   @Override
   public Dialog onCreateDialog(@Nullable Bundle savedInstanceState)
   {
-    server = IServer.getForCurrentActivity(getActivity());
-
     final LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
     dialogView = inflater.inflate(R.layout.restore_dialog, null);
 
-    final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+    final AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.DialogStyle)
         .setView(dialogView)
         .setTitle("Account Wiederherstellung")
         .setNegativeButton("Schließen", (dialogInterface, i) -> dialogInterface.dismiss())
         .create();
 
+    server = IServer.getForCurrentActivityAndWindow(getActivity(), dialog.getWindow());
+
     formSendCode = FormModel.createForView(dialogView, dialog.getWindow(), IRegistrationRequest.class)
-        .initFieldAddition(ID_FIRST_NAME, "Vorname", IRegistrationRequest::getUserName)
+        .configureFieldAddition(ID_FIRST_NAME, "Vorname", IRegistrationRequest::getUserName)
         .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
         .combineWithField(ID_LAST_NAME, "Nachname")
         .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
         .doAddFields(pValues -> CommonUtil.newUserName(pValues[0], pValues[1]))
-        .initStringFieldAddition(ID_MAIL, "Email", IRegistrationRequest::getMailAddress)
+        .configureStringFieldAddition(ID_MAIL, "Email", IRegistrationRequest::getMailAddress)
         .requiresRegex(VALID_EMAIL_ADDRESS_REGEX)
         .doAddStringField()
         .addButton(R.id.button_send_code, this::_sendRestoreCode);
 
-    formRestore = FormModel.createForView(dialogView, dialog.getWindow(), String.class)
-        .initStringFieldAddition(ID_CODE, "Code", identity())
+    formRestore = SingleStringFormModel.createForView(dialogView, dialog.getWindow())
+        .configureSingleStringFieldAddition(ID_CODE, "Code")
         .requiresExactLength(CODE_LENGTH)
-        .doAddStringField()
+        .doAddSingleStringField()
         .addButton(R.id.button_restore_account, this::_restoreAuthentication);
 
     server.getLastRestoreData().ifPresent(this::_enableRestoreButton);
@@ -68,7 +68,7 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     dialog.setOnShowListener(arg ->
     {
       //Set button color
-      dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.dialogNegativeButton));
+      dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(dialog.getContext(), R.color.svl_yellow));
     });
 
     return dialog;

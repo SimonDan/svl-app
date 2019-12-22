@@ -27,12 +27,12 @@ public class AuthenticationActivity extends AppCompatActivity
 
     server = IServer.getForCurrentActivity(this);
     registrationFormModel = FormModel.createForActivity(this, IRegistrationRequest.class)
-        .initFieldAddition(ID_FIRST_NAME, "Vorname", IRegistrationRequest::getUserName)
+        .configureFieldAddition(ID_FIRST_NAME, "Vorname", IRegistrationRequest::getUserName)
         .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
         .combineWithField(ID_LAST_NAME, "Nachname")
         .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
         .doAddFields(pValues -> newUserName(pValues[0], pValues[1]))
-        .initStringFieldAddition(ID_MAIL, "Email", IRegistrationRequest::getMailAddress)
+        .configureStringFieldAddition(ID_MAIL, "Email", IRegistrationRequest::getMailAddress)
         .requiresRegex(VALID_EMAIL_ADDRESS_REGEX)
         .doAddStringField()
         .addButton(R.id.button_create_account, this::_registerUser)
