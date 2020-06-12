@@ -3,11 +3,15 @@ package com.github.simondan.svl.app.communication;
 import android.content.*;
 import androidx.security.crypto.*;
 import com.github.simondan.svl.communication.auth.*;
+import de.adito.ojcms.rest.auth.api.AuthenticationRequest;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.Optional;
+
+import static com.github.simondan.svl.communication.auth.SVLAuthenticationResponse.USER_ROLE;
+import static de.adito.ojcms.rest.auth.api.AuthenticationResponse.*;
 
 /**
  * @author Simon Danner, 16.11.2019
@@ -15,7 +19,7 @@ import java.util.Optional;
 final class SecurePreferencesCredentialsStore implements ICredentialsStore
 {
   private static final String TOKEN_KEY = "tokenKey";
-  private static final String USER_NAME_KEY = "userNameKey";
+  private static final String USER_MAIL_KEY = "userMailKey";
   private static final String NEXT_PASSWORD_KEY = "nextPasswordKey";
   private static final String USER_ROLE_KEY = "nextPasswordKey";
   private static final String RESTORE_TIMESTAMP_KEY = "restoreTimestampKey";
@@ -54,30 +58,23 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
-  public boolean isUserNameInitialized()
+  public boolean isUserMailInitialized()
   {
-    return sharedPreferences.contains(USER_NAME_KEY);
+    return sharedPreferences.contains(USER_MAIL_KEY);
   }
 
   @Override
   public boolean areCredentialsInitialized()
   {
-    return sharedPreferences.contains(USER_NAME_KEY) &&
+    return sharedPreferences.contains(USER_MAIL_KEY) &&
         sharedPreferences.contains(NEXT_PASSWORD_KEY) &&
         sharedPreferences.contains(TOKEN_KEY);
   }
 
   @Override
-  public UserName getUserName()
+  public String getUserMail()
   {
-    try
-    {
-      return UserName.of(_read(USER_NAME_KEY));
-    }
-    catch (BadUserNameException pE)
-    {
-      throw new RuntimeException(pE);
-    }
+    return _read(USER_MAIL_KEY);
   }
 
   @Override
@@ -87,24 +84,10 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
-  public IAuthenticationRequest buildAuthenticationRequest()
+  public AuthenticationRequest buildAuthenticationRequest()
   {
-    final UserName userName = getUserName();
-
-    return new IAuthenticationRequest()
-    {
-      @Override
-      public UserName getUserName()
-      {
-        return userName;
-      }
-
-      @Override
-      public String getPassword()
-      {
-        return _read(NEXT_PASSWORD_KEY);
-      }
-    };
+    final String userMail = getUserMail();
+    return new AuthenticationRequest(userMail, _read(NEXT_PASSWORD_KEY));
   }
 
   @Override
@@ -120,21 +103,21 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   }
 
   @Override
-  public void setUserName(UserName pUserName)
+  public void setUserMail(String pUserMail)
   {
     final SharedPreferences.Editor editor = sharedPreferences.edit();
-    editor.putString(USER_NAME_KEY, pUserName.toString());
+    editor.putString(USER_MAIL_KEY, pUserMail);
     editor.apply();
   }
 
   @Override
-  public void saveNewAuthData(AuthenticationResponse pAuthenticationResponse)
+  public void saveNewAuthData(SVLAuthenticationResponse pAuthenticationResponse)
   {
     final SharedPreferences.Editor editor = sharedPreferences.edit();
 
-    editor.putString(TOKEN_KEY, pAuthenticationResponse.getToken());
-    editor.putString(NEXT_PASSWORD_KEY, pAuthenticationResponse.getNextPassword());
-    editor.putString(USER_ROLE_KEY, pAuthenticationResponse.getUserRole().name());
+    editor.putString(TOKEN_KEY, pAuthenticationResponse.getValue(TOKEN));
+    editor.putString(NEXT_PASSWORD_KEY, pAuthenticationResponse.getValue(NEXT_PASSWORD));
+    editor.putString(USER_ROLE_KEY, pAuthenticationResponse.getValue(USER_ROLE).name());
     editor.apply();
   }
 
@@ -151,7 +134,7 @@ final class SecurePreferencesCredentialsStore implements ICredentialsStore
   {
     final SharedPreferences.Editor editor = sharedPreferences.edit();
 
-    editor.remove(USER_NAME_KEY);
+    editor.remove(USER_MAIL_KEY);
     editor.remove(TOKEN_KEY);
     editor.remove(NEXT_PASSWORD_KEY);
     editor.remove(USER_ROLE_KEY);

@@ -11,7 +11,7 @@ public final class DefaultConfig
   {
   }
 
-  public static String SERVER_HOST = "192.168.178.83";
+  public static String SERVER_HOST = "192.168.178.75";
   public static int SERVER_PORT = 8080;
   public static String SERVER_APP_NAME = "svl-server";
   public static TimeoutConfig TIMEOUT_CONFIG = new TimeoutConfig(TimeUnit.SECONDS, 30);

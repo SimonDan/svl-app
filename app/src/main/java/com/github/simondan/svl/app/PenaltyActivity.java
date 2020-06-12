@@ -24,9 +24,6 @@ public class PenaltyActivity extends AppCompatActivity
     setSupportActionBar(toolbar);
 
     server = IServer.getForCurrentActivity(this);
-    server.retrieveDummy()
-        .doOnResult(System.out::println) //Just check if we got auth
-        .startCall();
 
     FloatingActionButton fab = findViewById(R.id.fab);
     fab.setOnClickListener(new View.OnClickListener()

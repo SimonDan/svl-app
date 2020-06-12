@@ -2,10 +2,13 @@ package com.github.simondan.svl.app.communication;
 
 import android.content.Context;
 import com.github.simondan.svl.app.communication.exceptions.*;
-import com.github.simondan.svl.communication.auth.*;
+import com.github.simondan.svl.communication.auth.SVLAuthenticationResponse;
+import de.adito.ojcms.rest.auth.api.*;
 
 import java.util.Objects;
 import java.util.function.Function;
+
+import static de.adito.ojcms.rest.auth.api.RestoreAuthenticationRequest.USER_MAIL;
 
 /**
  * @author Simon Danner, 18.11.2019
@@ -24,49 +27,42 @@ public class RestImpl implements IRestInterface
   }
 
   @Override
-  public void registerNewUser(IRegistrationRequest pRegistrationRequest) throws RequestFailedException,
+  public void registerNewUser(RegistrationRequest pRegistrationRequest) throws RequestFailedException,
       RequestTimeoutException
   {
-    _newAuthCall("register", pRegistrationRequest, IRegistrationRequest.class, IRegistrationRequest::getUserName);
+    _newAuthCall("register", pRegistrationRequest, RegistrationRequest.class, pRequest ->
+        pRequest.getValue(RegistrationRequest.USER_MAIL));
   }
 
   @Override
-  public void requestAuthRestoreCode(IRegistrationRequest pRegistrationData) throws RequestFailedException,
+  public void requestAuthRestoreCode(String pUserMail) throws RequestFailedException,
       RequestTimeoutException
   {
     RestBuilder.buildNoResultCall(context)
         .path(PATH_AUTH + "/requestCode")
         .method(EMethod.PUT)
-        .jsonParam(pRegistrationData, IRegistrationRequest.class)
+        .textParam(pUserMail)
         .executeCallNoAuthentication();
   }
 
   @Override
-  public void restoreAuthentication(IRestoreAuthRequest pRestoreAuthRequest) throws RequestFailedException,
+  public void restoreAuthentication(RestoreAuthenticationRequest pRestoreAuthRequest) throws RequestFailedException,
       RequestTimeoutException
   {
-    _newAuthCall("restore", pRestoreAuthRequest, IRestoreAuthRequest.class, IRestoreAuthRequest::getUserName);
-  }
-
-  @Override
-  public String getDummy() throws AuthenticationImpossibleException, RequestTimeoutException, RequestFailedException
-  {
-    return RestBuilder.buildCall(context, String.class)
-        .path("dummy/test")
-        .method(EMethod.GET)
-        .executeCall();
+    _newAuthCall("restore", pRestoreAuthRequest, RestoreAuthenticationRequest.class,
+        pRequest -> pRequest.getValue(USER_MAIL));
   }
 
   private <REQUEST> void _newAuthCall(String pAuthPath, REQUEST pRequest, Class<? super REQUEST> pRequestType, Function<REQUEST,
-      UserName> pUserNameRetriever) throws RequestTimeoutException, RequestFailedException
+      String> pUserMailRetriever) throws RequestTimeoutException, RequestFailedException
   {
-    final AuthenticationResponse authenticationResponse = RestBuilder.buildCall(context, AuthenticationResponse.class)
+    final SVLAuthenticationResponse authenticationResponse = RestBuilder.buildCall(context, SVLAuthenticationResponse.class)
         .path(PATH_AUTH + "/" + pAuthPath)
         .method(EMethod.POST)
         .jsonParam(pRequest, pRequestType)
         .executeCallNoAuthentication();
 
-    credentialsStore.setUserName(pUserNameRetriever.apply(pRequest));
+    credentialsStore.setUserMail(pUserMailRetriever.apply(pRequest));
     credentialsStore.saveNewAuthData(authenticationResponse);
   }
 }

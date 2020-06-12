@@ -2,6 +2,7 @@ package com.github.simondan.svl.app.communication;
 
 import android.content.Context;
 import com.github.simondan.svl.communication.auth.*;
+import de.adito.ojcms.rest.auth.api.AuthenticationRequest;
 
 import java.time.Instant;
 
@@ -15,23 +16,23 @@ public interface ICredentialsStore
     return new SecurePreferencesCredentialsStore(pContext);
   }
 
-  boolean isUserNameInitialized();
+  boolean isUserMailInitialized();
 
   boolean areCredentialsInitialized();
 
-  UserName getUserName();
+  String getUserMail();
 
   String getActiveToken();
 
-  IAuthenticationRequest buildAuthenticationRequest();
+  AuthenticationRequest buildAuthenticationRequest();
 
   EUserRole getUserRole();
 
   Instant getLastRestoreCodeTimestamp();
 
-  void setUserName(UserName pUserName);
+  void setUserMail(String pUserMail);
 
-  void saveNewAuthData(AuthenticationResponse pAuthenticationResponse);
+  void saveNewAuthData(SVLAuthenticationResponse pAuthenticationResponse);
 
   void setLastRestoreCodeTimestamp(Instant pTimestamp);
 

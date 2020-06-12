@@ -3,12 +3,12 @@ package com.github.simondan.svl.app.communication;
 import com.github.simondan.svl.app.communication.config.TimeoutConfig;
 import com.github.simondan.svl.app.communication.exceptions.*;
 import com.github.simondan.svl.communication.ESupportedHttpStatus;
-import com.github.simondan.svl.communication.auth.AuthenticationResponse;
+import com.github.simondan.svl.communication.auth.SVLAuthenticationResponse;
 import okhttp3.*;
 
 import java.io.IOException;
 
-import static com.github.simondan.svl.communication.utils.GsonFactory.GSON;
+import static de.adito.ojcms.rest.auth.util.OJGsonSerializer.GSON_INSTANCE;
 
 /**
  * @author Simon Danner, 09.11.2019
@@ -54,7 +54,7 @@ class RestCall<RESULT>
   private RESULT _callButRequestNewAuthBefore() throws AuthenticationImpossibleException, RequestTimeoutException, RequestFailedException
   {
     //Request new authentication credentials from server
-    final AuthenticationResponse newAuthentication = _requestNewAuthentication();
+    final SVLAuthenticationResponse newAuthentication = _requestNewAuthentication();
     credentialsStore.saveNewAuthData(newAuthentication);
 
     //Try again with new credentials
@@ -89,7 +89,7 @@ class RestCall<RESULT>
       final ResponseBody body = response.body();
       assert body != null;
 
-      return GSON.fromJson(body.string(), pResultType);
+      return GSON_INSTANCE.fromJson(body.string(), pResultType);
     }
     catch (IOException pE)
     {
@@ -114,12 +114,12 @@ class RestCall<RESULT>
     }
   }
 
-  private AuthenticationResponse _requestNewAuthentication() throws RequestTimeoutException, AuthenticationImpossibleException
+  private SVLAuthenticationResponse _requestNewAuthentication() throws RequestTimeoutException, AuthenticationImpossibleException
   {
     try
     {
       final Call authenticationCall = callConfig.createAuthenticationCall();
-      return _doCall(authenticationCall, AuthenticationResponse.class);
+      return _doCall(authenticationCall, SVLAuthenticationResponse.class);
     }
     catch (RequestFailedException pE)
     {

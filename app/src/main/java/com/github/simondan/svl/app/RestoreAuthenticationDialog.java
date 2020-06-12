@@ -9,24 +9,21 @@ import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.content.ContextCompat;
 import com.github.simondan.svl.app.server.*;
-import com.github.simondan.svl.app.util.*;
-import com.github.simondan.svl.communication.auth.IRegistrationRequest;
+import com.github.simondan.svl.app.util.SingleStringFormModel;
 
 import java.time.*;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static com.github.simondan.svl.communication.utils.SharedUtils.*;
+import static de.adito.ojcms.rest.auth.util.SharedUtils.*;
 
 public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 {
-  private static final int ID_FIRST_NAME = R.id.edit_restore_auth_first_name;
-  private static final int ID_LAST_NAME = R.id.edit_restore_auth_last_name;
   private static final int ID_MAIL = R.id.edit_restore_auth_mail;
   private static final int ID_CODE = R.id.edit_restore_auth_code;
 
   private IServer server;
-  private FormModel<IRegistrationRequest> formSendCode;
+  private SingleStringFormModel formSendCode;
   private SingleStringFormModel formRestore;
   private View dialogView;
   private CountDownTimer currentCountDown;
@@ -46,15 +43,10 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
 
     server = IServer.getForCurrentActivityAndWindow(getActivity(), dialog.getWindow());
 
-    formSendCode = FormModel.createForView(dialogView, dialog.getWindow(), IRegistrationRequest.class)
-        .configureFieldAddition(ID_FIRST_NAME, "Vorname", IRegistrationRequest::getUserName)
-        .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-        .combineWithField(ID_LAST_NAME, "Nachname")
-        .requiresLengthBetween(MIN_NAME_LENGTH, MAX_NAME_LENGTH)
-        .doAddFields(pValues -> CommonUtil.newUserName(pValues[0], pValues[1]))
-        .configureStringFieldAddition(ID_MAIL, "Email", IRegistrationRequest::getMailAddress)
+    formSendCode = SingleStringFormModel.createForView(dialogView, dialog.getWindow())
+        .configureSingleStringFieldAddition(ID_MAIL, "Email")
         .requiresRegex(VALID_EMAIL_ADDRESS_REGEX)
-        .doAddStringField()
+        .doAddSingleStringField()
         .addButton(R.id.button_send_code, this::_sendRestoreCode);
 
     formRestore = SingleStringFormModel.createForView(dialogView, dialog.getWindow())
@@ -79,7 +71,7 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     final Instant expirationTimestamp = pRestoreData.getSendTimestamp().plus(RESTORE_CODE_EXPIRATION_THRESHOLD);
     final TextView codeText = dialogView.findViewById(R.id.text_code);
 
-    final String textInvalidCode = "Der Code für " + pRestoreData.getUserName() + " ist abgelaufen und nicht mehr gültig!";
+    final String textInvalidCode = "Der Code für " + pRestoreData.getUserMail() + " ist abgelaufen und nicht mehr gültig!";
 
     if (expirationTimestamp.isBefore(Instant.now()))
     {
@@ -90,7 +82,7 @@ public class RestoreAuthenticationDialog extends AppCompatDialogFragment
     dialogView.findViewById(R.id.edit_restore_auth_code).setEnabled(true);
     dialogView.findViewById(R.id.button_restore_account).setEnabled(true);
 
-    final Function<Duration, String> textCreator = pRemaining -> "Ein Code wurde für " + pRestoreData.getUserName() +
+    final Function<Duration, String> textCreator = pRemaining -> "Ein Code wurde für " + pRestoreData.getUserMail() +
         " gesendet!\nEr ist noch " + pRemaining.toMinutes() + " Minuten und " + pRemaining.getSeconds() % 60 + " Sekunden gültig!";
 
     if (currentCountDown != null)

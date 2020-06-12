@@ -5,7 +5,7 @@ import android.content.Context;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import com.github.simondan.svl.communication.utils.SharedUtils;
+import de.adito.ojcms.rest.auth.util.SharedUtils;
 
 import java.util.*;
 import java.util.function.*;

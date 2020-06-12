@@ -1,7 +1,5 @@
 package com.github.simondan.svl.app.server;
 
-import com.github.simondan.svl.communication.auth.UserName;
-
 import java.time.Instant;
 
 /**
@@ -9,18 +7,18 @@ import java.time.Instant;
  */
 public class LastRestoreData
 {
-  private final UserName userName;
+  private final String userMail;
   private final Instant timestamp;
 
-  LastRestoreData(UserName pUserName, Instant pTimestamp)
+  LastRestoreData(String pUserMail, Instant pTimestamp)
   {
-    userName = pUserName;
+    userMail = pUserMail;
     timestamp = pTimestamp;
   }
 
-  public UserName getUserName()
+  public String getUserMail()
   {
-    return userName;
+    return userMail;
   }
 
   public Instant getSendTimestamp()

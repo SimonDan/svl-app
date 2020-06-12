@@ -2,7 +2,7 @@ package com.github.simondan.svl.app.communication;
 
 import android.content.Context;
 import com.github.simondan.svl.app.communication.exceptions.*;
-import com.github.simondan.svl.communication.auth.*;
+import de.adito.ojcms.rest.auth.api.*;
 
 /**
  * @author Simon Danner, 18.11.2019
@@ -14,11 +14,9 @@ public interface IRestInterface
     return new RestImpl(pContext);
   }
 
-  void registerNewUser(IRegistrationRequest pRegistrationRequest) throws RequestTimeoutException, RequestFailedException;
+  void registerNewUser(RegistrationRequest pRegistrationRequest) throws RequestTimeoutException, RequestFailedException;
 
-  void requestAuthRestoreCode(IRegistrationRequest pRegistrationData) throws RequestFailedException, RequestTimeoutException;
+  void requestAuthRestoreCode(String pUserMail) throws RequestFailedException, RequestTimeoutException;
 
-  void restoreAuthentication(IRestoreAuthRequest pRestoreAuthRequest) throws RequestTimeoutException, RequestFailedException;
-
-  String getDummy() throws AuthenticationImpossibleException, RequestTimeoutException, RequestFailedException;
+  void restoreAuthentication(RestoreAuthenticationRequest pRequest) throws RequestTimeoutException, RequestFailedException;
 }

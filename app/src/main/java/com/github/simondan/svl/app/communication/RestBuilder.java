@@ -3,7 +3,7 @@ package com.github.simondan.svl.app.communication;
 import android.content.Context;
 import com.github.simondan.svl.app.communication.config.*;
 import com.github.simondan.svl.app.communication.exceptions.*;
-import com.github.simondan.svl.communication.auth.IAuthenticationRequest;
+import de.adito.ojcms.rest.auth.api.AuthenticationRequest;
 import okhttp3.*;
 
 import javax.net.ssl.*;
@@ -11,13 +11,14 @@ import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.simondan.svl.communication.utils.GsonFactory.GSON;
+import static de.adito.ojcms.rest.auth.util.OJGsonSerializer.GSON_INSTANCE;
 
 /**
  * @author Simon Danner, 16.11.2019
  */
 class RestBuilder<RESULT>
 {
+  private static final MediaType TEXT_MEDIA_TYPE = MediaType.parse("text/plain; charset=utf-8");
   private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
   private final ICredentialsStore credentialsStore;
@@ -55,9 +56,15 @@ class RestBuilder<RESULT>
     return this;
   }
 
+  RestBuilder<RESULT> textParam(String pParam)
+  {
+    param = RequestBody.create(TEXT_MEDIA_TYPE, pParam);
+    return this;
+  }
+
   RestBuilder<RESULT> jsonParam(Object pParam, Class<?> pParamType)
   {
-    param = RequestBody.create(JSON_MEDIA_TYPE, GSON.toJson(pParam, pParamType));
+    param = RequestBody.create(JSON_MEDIA_TYPE, GSON_INSTANCE.toJson(pParam, pParamType));
     return this;
   }
 
@@ -131,9 +138,9 @@ class RestBuilder<RESULT>
     @Override
     public Call createAuthenticationCall()
     {
-      final IAuthenticationRequest authRequest = credentialsStore.buildAuthenticationRequest();
+      final AuthenticationRequest authRequest = credentialsStore.buildAuthenticationRequest();
       return _createCall(_initRequest(DefaultConfig.AUTH_PATH)
-          .post(RequestBody.create(JSON_MEDIA_TYPE, GSON.toJson(authRequest, IAuthenticationRequest.class)))
+          .post(RequestBody.create(JSON_MEDIA_TYPE, GSON_INSTANCE.toJson(authRequest, AuthenticationRequest.class)))
           .build());
     }
 
@@ -141,6 +148,8 @@ class RestBuilder<RESULT>
     {
       return createUnsafeOkHttpClientBuilder()
           .callTimeout(timeoutConfig.getTimeout(), timeoutConfig.getTimeUnit())
+          .readTimeout(timeoutConfig.getTimeout(), timeoutConfig.getTimeUnit())
+          .writeTimeout(timeoutConfig.getTimeout(), timeoutConfig.getTimeUnit())
           .build()
           .newCall(pRequest);
     }

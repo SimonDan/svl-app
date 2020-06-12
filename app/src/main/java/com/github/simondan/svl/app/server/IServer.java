@@ -2,7 +2,8 @@ package com.github.simondan.svl.app.server;
 
 import android.app.Activity;
 import android.view.Window;
-import com.github.simondan.svl.communication.auth.*;
+import com.github.simondan.svl.communication.auth.EUserRole;
+import de.adito.ojcms.rest.auth.api.RegistrationRequest;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -28,13 +29,11 @@ public interface IServer
 
   EUserRole getUserRole();
 
-  ICompletionCallback registerUser(IRegistrationRequest pRegistrationRequest);
+  ICompletionCallback registerUser(RegistrationRequest pRegistrationRequest);
 
-  ICompletionCallback requestRestoreCode(IRegistrationRequest pRegistrationData);
+  ICompletionCallback requestRestoreCode(String pUserMail);
 
   ICompletionCallback restoreAuthentication(String pRestoreCode);
-
-  IResultCallback<String> retrieveDummy();
 
   interface IResultCallback<RESULT> extends IStarter
   {
